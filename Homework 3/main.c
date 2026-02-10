@@ -45,7 +45,8 @@ void main(void){
 
   wheel_move = 0;
   forward = TRUE;
-
+  P6OUT |= L_FORWARD;
+  P6OUT |= R_FORWARD;
   // Begining of the "While" Operating System
   while(ALWAYS) {                      // Can the Operating system run
     Carlson_StateMachine();            // Run a Time Based State Machine
