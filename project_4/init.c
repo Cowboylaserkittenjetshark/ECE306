@@ -4,7 +4,7 @@
 #include "Include/ports.h"
 #include "Include/interrupts.h"
 
-void Init_Conditions(void){
+void init_conditions(void){
   int i;
   for(i=0;i<11;i++){
     display_line[0][i] = RESET_STATE;
@@ -28,7 +28,7 @@ void Init_Conditions(void){
   enable_interrupts();
 }
 
-void Init_LEDs(void){
+void init_leds(void){
 // Turns on both LEDs
   P1OUT &= ~RED_LED;
   P6OUT &= ~GRN_LED;

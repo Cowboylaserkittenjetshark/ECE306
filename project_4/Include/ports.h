@@ -72,12 +72,12 @@
 #define P6_5                   (0x20) // 6.5
 #define GRN_LED                (0x40) // 6.6 GREEN LED
  
-void Init_Ports(void);
-void Init_Port_1(void);
-void Init_Port_2(void);
-void Init_Port_3(void);
+void init_ports(void);
+void init_port_1(void);
+void init_port_2(void);
+void init_port_3(void);
 //void Init_Port_3(char smclk);
-void Init_Port_4(void);
-void Init_Port_5(void);
-void Init_Port_6(void);
+void init_port_4(void);
+void init_port_5(void);
+void init_port_6(void);
 

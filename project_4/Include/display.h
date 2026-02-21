@@ -104,7 +104,7 @@ void lcd_write_line3(void);
 
 void lcd_command( char data);
 void LCD_test(void);
-void Display_Process(void);
+void display_process(void);
 void Display_Update(char p_L1,char p_L2,char p_L3,char p_L4);
 int wait_for_character(void);
 void print_CR(void);

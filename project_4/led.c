@@ -5,11 +5,11 @@
 #include "Include/ports.h"
 #include "Include/global.h"
 
-void Carlson_StateMachine(void) {
+void carlson_state_machine(void) {
   switch(Time_Sequence) {
     case 250:
       if(one_time) {
-        Init_LEDs();
+        init_leds();
         lcd_BIG_mid();
         display_changed = 1;
         one_time = 0;

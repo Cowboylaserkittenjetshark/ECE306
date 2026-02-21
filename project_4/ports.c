@@ -1,16 +1,16 @@
-#include  "msp430.h"
-#include  "Include/ports.h"
+#include "msp430.h"
+#include "Include/ports.h"
 
-void Init_Ports(void){
-    Init_Port_1();
-    Init_Port_2();
-    Init_Port_3();
-    Init_Port_4();
-    Init_Port_5();
-    Init_Port_6();
+void init_ports(void){
+    init_port_1();
+    init_port_2();
+    init_port_3();
+    init_port_4();
+    init_port_5();
+    init_port_6();
 }
 
-void Init_Port_1(void) {
+void init_port_1(void) {
     P1OUT = 0x00; // P1 set Low
     P1DIR = 0x00; // Set P1 direction to output
 
@@ -56,7 +56,7 @@ void Init_Port_1(void) {
 }
 
 // Configure Port 2
-void Init_Port_2(void) {
+void init_port_2(void) {
     P2OUT = 0x00; // P2 set Low
     P2DIR = 0x00; // Set P2 direction to output
 
@@ -106,7 +106,7 @@ void Init_Port_2(void) {
 }
 
 // Configure port 3
-void Init_Port_3(void) { 
+void init_port_3(void) { 
     P3OUT = 0x00; // P3 set Low
     P3DIR = 0x00; // Set P3 direction to output
 
@@ -152,7 +152,7 @@ void Init_Port_3(void) {
 }
 
 // Configure port 4
-void Init_Port_4(void) {
+void init_port_4(void) {
     P4OUT = 0x00; // P4 set Low
     P4DIR = 0x00; // Set P4 direction to output
 
@@ -194,7 +194,7 @@ void Init_Port_4(void) {
 }
 
 // Configure port 5
-void Init_Port_5(void) {
+void init_port_5(void) {
     P5OUT = 0x00; // P5 set Low
     P5DIR = 0x00; // Set P5 direction to output
 
@@ -225,13 +225,13 @@ void Init_Port_5(void) {
 }
 
 // Configure port 6
-void Init_Port_6(void) {
+void init_port_6(void) {
     P6OUT = 0x00; // P6 set Low
     P6DIR = 0x00; // Set P6 direction to output
 
     P6SEL0 &= ~LCD_BACKLITE;
     P6SEL1 &= ~LCD_BACKLITE;
-    P6OUT |= LCD_BACKLITE;
+    P6OUT &= ~LCD_BACKLITE;
     P6DIR |= LCD_BACKLITE;
 
     P6SEL0 &= ~R_FORWARD;

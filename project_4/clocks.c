@@ -3,16 +3,9 @@
 #include  "Include/global.h"
 #include  "Include/clocks.h"
 
-// MACROS ========================================================================
-#define MCLK_FREQ_MHZ           (8) // MCLK = 8MHz
-#define CLEAR_REGISTER     (0X0000)
-
-void Init_Clocks(void);
-void Software_Trim(void);
-
-void Init_Clocks(void){
+void init_clocks(void){
 // -----------------------------------------------------------------------------
-// Clock Configurtaions
+// Clock Configurations
 // This is the clock initialization for the program.
 // Initial clock configuration, runs immediately after port configuration.
 // Disables 1ms watchdog timer,
@@ -43,7 +36,7 @@ void Init_Clocks(void){
   CSCTL3 |= SELREF__XT1CLK;  // Set XT1CLK as FLL reference source
   __delay_cycles(3);
   __bic_SR_register(SCG0);   // enable FLL
-  Software_Trim();           // Software Trim to get the best DCOFTRIM value
+  software_trim();           // Software Trim to get the best DCOFTRIM value
 
   CSCTL4 = SELA__XT1CLK;     // Set ACLK = XT1CLK = 32768Hz
   CSCTL4 |= SELMS__DCOCLKDIV;// DCOCLK = MCLK and SMCLK source
@@ -57,7 +50,7 @@ void Init_Clocks(void){
                              // to activate previously configured port settings
 }
 
-void Software_Trim(void){
+void software_trim(void){
 // --COPYRIGHT--,BSD_EX
 // Copyright (c) 2014, Texas Instruments Incorporated
 // All rights reserved.

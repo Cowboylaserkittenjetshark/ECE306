@@ -4,10 +4,10 @@
 #define RESET_STATE (0)
 
 // Initialize display and enable interupts
-void Init_Conditions(void);
+void init_conditions(void);
 
 // Initialize LEDs
 // Turns both LEDs on
-void Init_LEDs(void);
+void init_leds(void);
 
 #endif

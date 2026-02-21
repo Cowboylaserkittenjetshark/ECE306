@@ -2,7 +2,7 @@
 #define LED_H
 
 // LED cycle
-void Carlson_StateMachine(void);
+void carlson_state_machine(void);
 
 // LED Configurations
 void IR_LED_control(char selection);

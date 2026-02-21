@@ -1,7 +1,7 @@
 #include "Include/display.h"
 #include "Include/global.h"
 
-void Display_Process(void){
+void display_process(void){
   if(update_display){
     update_display = 0;
     if(display_changed){
