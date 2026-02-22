@@ -2,3 +2,8 @@
 .jxbrowser.userdata/
 .tempfiles/
 RemoteSystemsTempFiles/
+Debug/
+Release/
+.theia/
+dvt/
+.clangd
