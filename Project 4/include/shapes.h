@@ -5,7 +5,7 @@
 
 #define WAIT_TIME (500)
 #define PERIOD (10)
-#define CIRCLE_PERIODS (500)
+#define CIRCLE_PERIODS (125)
 #define CIRCLE_MAJOR_DUTY (10)
 #define CIRCLE_MINOR_DUTY (1)
 #define TRIANGLE_STRAIGHT_PERIODS (50)
@@ -18,6 +18,7 @@ typedef enum shape { NONE, CIRCLE, TRIANGLE, FEIGHT } Shape;
 
 typedef enum state { WAIT, START, RUN, END, ERROR } State;
 typedef enum triangle_state { STRAIGHT, TURN } Triangle_State;
+typedef enum figure_eight_state { CW, CCW } Figure_Eight_State;
 
 void shape_state_machine(void);
 

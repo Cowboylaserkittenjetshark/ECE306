@@ -12,6 +12,9 @@ volatile State state = WAIT;
 volatile Triangle_State triangle_state = STRAIGHT;
 volatile unsigned int triangle_segment = 0;
 
+// Figure eight things
+volatile Figure_Eight_State figure_eight_state = CW;
+
 // Time elapsed waiting to start
 volatile unsigned int wait_time_elapsed = 0;
 
@@ -41,13 +44,16 @@ void shape_state_machine(void) {
       set_state(END);
       break;
     default:
+      set_state(ERROR);
       break;
     }
     break;
   case END:
+  case ERROR:
     end();
     break;
   default:
+    set_state(ERROR);
     break;
   }
 }
@@ -74,6 +80,7 @@ void start(void) {
     cycle_time = 0;
     triangle_state = STRAIGHT;
     triangle_segment = 0;
+    figure_eight_state = CW;
     motors_forward();
     set_state(RUN);
   }
@@ -85,7 +92,7 @@ void run_circle(void) {
     if (period_count <= CIRCLE_PERIODS) {
       if (cycle_time >= CIRCLE_MAJOR_DUTY)
         left_motor_off();
-      
+
       if (cycle_time >= CIRCLE_MINOR_DUTY)
         right_motor_off();
 
@@ -93,8 +100,10 @@ void run_circle(void) {
       if (cycle_time >= PERIOD) {
         cycle_time = 0;
         period_count += 1;
-        if(CIRCLE_MAJOR_DUTY > 0) left_motor_forward();
-        if(CIRCLE_MINOR_DUTY > 0) right_motor_forward();
+        if (CIRCLE_MAJOR_DUTY > 0)
+          left_motor_forward();
+        if (CIRCLE_MINOR_DUTY > 0)
+          right_motor_forward();
       }
     } else
       set_state(END);
@@ -102,49 +111,108 @@ void run_circle(void) {
 }
 
 void run_triangle(void) {
-  if(time_change) {
+  if (time_change) {
     time_change = false;
     switch (triangle_state) {
-      case STRAIGHT:
-        if(period_count <= TRIANGLE_STRAIGHT_PERIODS) {
-          if(cycle_time >= TRIANGLE_STRAIGHT_DUTY) motors_off();
-          if(cycle_time >= PERIOD) {
-            cycle_time = 0;
-            period_count += 1;
-            if(TRIANGLE_STRAIGHT_DUTY > 0) motors_forward();
-          }
-        } else if (triangle_segment < 5) {
-          triangle_state = TURN;
-          triangle_segment += 1;
-          period_count = 0;
-        } else set_state(ERR);
-        break;
-      case TURN:
-        if(period_count <= TRIANGLE_TURN_PERIODS) {
-          if (cycle_time >= TRIANGLE_MAJOR_DUTY)
-            left_motor_off();
-        
-          if (cycle_time >= TRIANGLE_MINOR_DUTY)
-            right_motor_off();
-       
-          if(cycle_time >= PERIOD) {
-            cycle_time = 0;
-            period_count += 1;
-            if(TRIANGLE_MAJOR_DUTY > 0) left_motor_forward();
-            if(TRIANGLE_MINOR_DUTY > 0) right_motor_forward();
-          }
-        } else if (triangle_segment < 5) {
-          triangle_state = STRAIGHT;
-          triangle_segment += 1;
-          period_count = 0;
-        } else set_state(END);
-        break;
-      default: break;
+    case STRAIGHT:
+      if (period_count <= TRIANGLE_STRAIGHT_PERIODS) {
+        if (cycle_time >= TRIANGLE_STRAIGHT_DUTY)
+          motors_off();
+        if (cycle_time >= PERIOD) {
+          cycle_time = 0;
+          period_count += 1;
+          if (TRIANGLE_STRAIGHT_DUTY > 0)
+            motors_forward();
+        }
+      } else if (triangle_segment < 5) {
+        triangle_state = TURN;
+        triangle_segment += 1;
+        period_count = 0;
+      } else
+        set_state(ERROR);
+      break;
+    case TURN:
+      if (period_count <= TRIANGLE_TURN_PERIODS) {
+        if (cycle_time >= TRIANGLE_MAJOR_DUTY)
+          left_motor_off();
+
+        if (cycle_time >= TRIANGLE_MINOR_DUTY)
+          right_motor_off();
+
+        if (cycle_time >= PERIOD) {
+          cycle_time = 0;
+          period_count += 1;
+          if (TRIANGLE_MAJOR_DUTY > 0)
+            left_motor_forward();
+          if (TRIANGLE_MINOR_DUTY > 0)
+            right_motor_forward();
+        }
+      } else if (triangle_segment < 5) {
+        triangle_state = STRAIGHT;
+        triangle_segment += 1;
+        period_count = 0;
+      } else
+        set_state(END);
+      break;
+    default:
+      set_state(ERROR);
+      break;
     }
   }
 }
 
-void run_figure_eight(void) {}
+void run_figure_eight(void) {
+  if (time_change) {
+    time_change = false;
+    switch (figure_eight_state) {
+    case CW:
+      if (period_count <= CIRCLE_PERIODS) {
+        if (cycle_time >= CIRCLE_MAJOR_DUTY)
+          left_motor_off();
+
+        if (cycle_time >= CIRCLE_MINOR_DUTY)
+          right_motor_off();
+
+        // Next period
+        if (cycle_time >= PERIOD) {
+          cycle_time = 0;
+          period_count += 1;
+          if (CIRCLE_MAJOR_DUTY > 0)
+            left_motor_forward();
+          if (CIRCLE_MINOR_DUTY > 0)
+            right_motor_forward();
+        }
+      } else {
+        period_count = 0;
+        figure_eight_state = CCW;
+      }
+      break;
+    case CCW:
+      if (period_count <= CIRCLE_PERIODS) {
+        if (cycle_time >= CIRCLE_MAJOR_DUTY)
+          right_motor_off();
+
+        if (cycle_time >= CIRCLE_MINOR_DUTY)
+          left_motor_off();
+
+        // Next period
+        if (cycle_time >= PERIOD) {
+          cycle_time = 0;
+          period_count += 1;
+          if (CIRCLE_MAJOR_DUTY > 0)
+            right_motor_forward();
+          if (CIRCLE_MINOR_DUTY > 0)
+            left_motor_forward();
+        }
+      } else
+        set_state(END);
+      break;
+    default:
+      set_state(ERROR);
+      break;
+    }
+  }
+}
 
 void end(void) {
   if (time_change) {
@@ -235,7 +303,7 @@ void set_state(State s) {
   case ERROR:
     strcpy(display_line[0], "  ERR     ");
     break;
- default:
+  default:
     strcpy(display_line[0], "  INVALID ");
     break;
   }
