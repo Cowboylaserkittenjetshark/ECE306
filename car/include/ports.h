@@ -1,6 +1,10 @@
 #ifndef PORTS_H
 #define PORTS_H
 
+#include <stdio.h>
+
+typedef enum pin_mode { GPIO, PRIMARY, SECONDARY, TERTIARY } PinMode;
+
 #define FALSE (0x00)     //
 #define TRUE (0x01)      //
 #define MOTOR (0x00)     //
@@ -77,10 +81,11 @@
 void init_ports(void);
 void init_port_1(void);
 void init_port_2(void);
-void init_port_3(void);
+void init_port_3(PinMode smclk_mode);
 // void Init_Port_3(char smclk);
 void init_port_4(void);
 void init_port_5(void);
 void init_port_6(void);
 
+void toggle_smclk(void);
 #endif

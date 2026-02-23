@@ -36,6 +36,7 @@ void main(void) {
       cycle_time += 1;
       time_change = true;
     }
+    carlson_state_machine();
     shape_state_machine();
     switches_process();
     display_process();   // Update Display

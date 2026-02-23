@@ -24,9 +24,7 @@ void sw1_process(void) {
       sw1_pressed = true;
       sw1_idle = false;
       sw1_debounce_elapsed = 0;
-      prev_shape();
-      // left_duty += 1;
-      // if (left_duty > PERIOD) left_duty = 0;
+      toggle_smclk();
     }
   }
 

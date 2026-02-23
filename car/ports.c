@@ -1,10 +1,15 @@
 #include "include/ports.h"
+#include "include/motors.h"
+#include "include/global.h"
+#include <string.h>
 #include "msp430.h"
+
+volatile PinMode smclk_mode = GPIO;
 
 void init_ports(void) {
   init_port_1();
   init_port_2();
-  init_port_3();
+  init_port_3(smclk_mode);
   init_port_4();
   init_port_5();
   init_port_6();
@@ -99,7 +104,7 @@ void init_port_2(void) {
 }
 
 // Configure port 3
-void init_port_3(void) {
+void init_port_3(PinMode smclk_mode) {
   P3OUT = 0x00; // P3 set Low
   P3DIR = 0x00; // Set P3 direction to output
 
@@ -123,10 +128,21 @@ void init_port_3(void) {
   P3OUT &= ~OA2P;
   P3DIR &= ~OA2P;
 
-  P3SEL0 &= ~SMCLK;
-  P3SEL1 &= ~SMCLK;
-  P3OUT &= ~SMCLK;
-  P3DIR &= ~SMCLK;
+  switch(smclk_mode){
+    case PRIMARY:
+      P3SEL0 |= SMCLK;
+      P3SEL1 &= ~SMCLK;
+      P3OUT |= SMCLK;
+      P3DIR = SMCLK;
+      break;
+    case GPIO:
+    default:
+      P3SEL0 &= ~SMCLK;
+      P3SEL1 &= ~SMCLK;
+      P3OUT &= ~SMCLK;
+      P3DIR &= ~SMCLK;
+      break;
+  }
 
   P3SEL0 |= DAC_CNTL;
   P3SEL1 |= DAC_CNTL;
@@ -251,4 +267,21 @@ void init_port_6(void) {
   P6SEL1 &= ~GRN_LED;
   P6OUT |= GRN_LED;
   P6DIR |= GRN_LED;
+}
+
+void toggle_smclk(void) {
+  switch(smclk_mode) {
+    case PRIMARY:
+      strcpy(display_line[2], "GPIO      ");
+      smclk_mode = GPIO;
+      break;
+    case GPIO:
+    default:
+      strcpy(display_line[2], "Primary   ");
+      smclk_mode = PRIMARY;
+      break;
+  }
+
+  display_changed = true;
+  init_port_3(smclk_mode);
 }
