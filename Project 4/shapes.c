@@ -90,6 +90,7 @@ void run_circle(void) {
   if (time_change) {
     time_change = false;
     if (period_count <= CIRCLE_PERIODS) {
+      motors_forward();
       if (cycle_time >= CIRCLE_MAJOR_DUTY)
         left_motor_off();
 
@@ -100,10 +101,10 @@ void run_circle(void) {
       if (cycle_time >= PERIOD) {
         cycle_time = 0;
         period_count += 1;
-        if (CIRCLE_MAJOR_DUTY > 0)
-          left_motor_forward();
-        if (CIRCLE_MINOR_DUTY > 0)
-          right_motor_forward();
+        // if (CIRCLE_MAJOR_DUTY > 0)
+        //   left_motor_forward();
+        // if (CIRCLE_MINOR_DUTY > 0)
+        //   right_motor_forward();
       }
     } else
       set_state(END);
@@ -116,13 +117,14 @@ void run_triangle(void) {
     switch (triangle_state) {
     case STRAIGHT:
       if (period_count <= TRIANGLE_STRAIGHT_PERIODS) {
+        motors_forward();
         if (cycle_time >= TRIANGLE_STRAIGHT_DUTY)
           motors_off();
         if (cycle_time >= PERIOD) {
           cycle_time = 0;
           period_count += 1;
-          if (TRIANGLE_STRAIGHT_DUTY > 0)
-            motors_forward();
+          // if (TRIANGLE_STRAIGHT_DUTY > 0)
+          //   motors_forward();
         }
       } else if (triangle_segment < 5) {
         triangle_state = TURN;
@@ -133,6 +135,7 @@ void run_triangle(void) {
       break;
     case TURN:
       if (period_count <= TRIANGLE_TURN_PERIODS) {
+        motors_forward();
         if (cycle_time >= TRIANGLE_MAJOR_DUTY)
           left_motor_off();
 
@@ -142,10 +145,10 @@ void run_triangle(void) {
         if (cycle_time >= PERIOD) {
           cycle_time = 0;
           period_count += 1;
-          if (TRIANGLE_MAJOR_DUTY > 0)
-            left_motor_forward();
-          if (TRIANGLE_MINOR_DUTY > 0)
-            right_motor_forward();
+          // if (TRIANGLE_MAJOR_DUTY > 0)
+          //   left_motor_forward();
+          // if (TRIANGLE_MINOR_DUTY > 0)
+          //   right_motor_forward();
         }
       } else if (triangle_segment < 5) {
         triangle_state = STRAIGHT;
@@ -167,6 +170,7 @@ void run_figure_eight(void) {
     switch (figure_eight_state) {
     case CW:
       if (period_count <= CIRCLE_PERIODS) {
+        motors_forward();
         if (cycle_time >= CIRCLE_MAJOR_DUTY)
           left_motor_off();
 
@@ -177,10 +181,10 @@ void run_figure_eight(void) {
         if (cycle_time >= PERIOD) {
           cycle_time = 0;
           period_count += 1;
-          if (CIRCLE_MAJOR_DUTY > 0)
-            left_motor_forward();
-          if (CIRCLE_MINOR_DUTY > 0)
-            right_motor_forward();
+          // if (CIRCLE_MAJOR_DUTY > 0)
+          //   left_motor_forward();
+          // if (CIRCLE_MINOR_DUTY > 0)
+          //   right_motor_forward();
         }
       } else {
         period_count = 0;
@@ -188,7 +192,8 @@ void run_figure_eight(void) {
       }
       break;
     case CCW:
-      if (period_count <= CIRCLE_PERIODS) {
+      if (period_count <= CIRCLE_PERIODS_CCW) {
+        motors_forward();
         if (cycle_time >= CIRCLE_MAJOR_DUTY)
           right_motor_off();
 
@@ -199,10 +204,10 @@ void run_figure_eight(void) {
         if (cycle_time >= PERIOD) {
           cycle_time = 0;
           period_count += 1;
-          if (CIRCLE_MAJOR_DUTY > 0)
-            right_motor_forward();
-          if (CIRCLE_MINOR_DUTY > 0)
-            left_motor_forward();
+          // if (CIRCLE_MAJOR_DUTY > 0)
+          //   right_motor_forward();
+          // if (CIRCLE_MINOR_DUTY > 0)
+          //   left_motor_forward();
         }
       } else
         set_state(END);
