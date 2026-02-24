@@ -169,7 +169,7 @@ void run_figure_eight(void) {
     time_change = false;
     switch (figure_eight_state) {
     case CW:
-      if (period_count <= CIRCLE_PERIODS) {
+      if (period_count <= FEIGHT_PERIODS_CW) {
         motors_forward();
         if (cycle_time >= CIRCLE_MAJOR_DUTY)
           left_motor_off();
@@ -192,7 +192,7 @@ void run_figure_eight(void) {
       }
       break;
     case CCW:
-      if (period_count <= CIRCLE_PERIODS_CCW) {
+      if (period_count <= FEIGHT_PERIODS_CCW) {
         motors_forward();
         if (cycle_time >= CIRCLE_MAJOR_DUTY)
           right_motor_off();
