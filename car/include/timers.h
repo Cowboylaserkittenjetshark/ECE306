@@ -1,16 +1,14 @@
 #ifndef TIMERS_H
 #define TIMERS_H
 
-void Init_Timers(void);
-void Init_Timer_B0(void);
-void Init_Timer_B1(void);
-void Init_Timer_B2(void);
-void Init_Timer_B3(void);
+#define TB0CCR0_INTERVAL (25000)
 
-void usleep(unsigned int usec);
-void usleep10(unsigned int usec);
-void five_msec_sleep(unsigned int msec);
-void measure_delay(void);
-void out_control_words(void);
+volatile unsigned int Time_Sequence;
+volatile char one_time;
+
+void init_timers(void);
+
+void init_timer_b0(void);
+__interrupt void timer_b0_interrupt(void);
 
 #endif

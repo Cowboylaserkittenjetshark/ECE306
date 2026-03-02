@@ -1,5 +1,6 @@
 #include "include/ports.h"
 #include "msp430.h"
+#include <driverlib.h>
 
 void init_ports(void) {
   init_port_1();
@@ -75,11 +76,10 @@ void init_port_2(void) {
   P2OUT &= ~IR_LED;  // Initial Value = Low / Off
   P2DIR |= IR_LED;   // Direction = output
 
-  P2SEL0 &= ~SW2; // SW2 Operation
-  P2SEL1 &= ~SW2; // SW2 Operation
-  P2OUT |= SW2;   // Configure pullup resistor
-  P2DIR &= ~SW2;  // Direction = input
-  P2REN |= SW2;   // Enable pullup resistor
+  GPIO_setAsInputPinWithPullUpResistor(PORT2, SW2);
+  GPIO_selectInterruptEdge(PORT2, SW2, GPIO_HIGH_TO_LOW_TRANSITION);
+  GPIO_clearInterrupt(PORT2, SW2);
+  GPIO_enableInterrupt(PORT2, SW2);
 
   P2SEL0 &= ~IOT_RUN_RED; // IOT_RUN_CPU GPIO operation
   P2SEL1 &= ~IOT_RUN_RED; // IOT_RUN_CPU GPIO operation
@@ -149,17 +149,16 @@ void init_port_4(void) {
   P4OUT = 0x00; // P4 set Low
   P4DIR = 0x00; // Set P4 direction to output
 
-  P4SEL0 &= ~RESET_LCD; // RESET_LCD GPIO operation
-  P4SEL1 &= ~RESET_LCD; // RESET_LCD GPIO operation
-  P4OUT &= ~RESET_LCD;  // Initial Value = Low / Off
-  P4DIR |= RESET_LCD;   // Direction = output
+  // Configure RESET_LCD as default low GPIO output
+  GPIO_setAsOutputPin(PORT4, RESET_LCD);
+  GPIO_setOutputLowOnPin(PORT4, RESET_LCD);
 
-  P4SEL0 &= ~SW1; // SW1 GPIO operation
-  P4SEL1 &= ~SW1; // SW1 GPIO operation
-  P4OUT |= SW1;   // Configure pullup resistor
-  P4DIR &= ~SW1;  // Direction = input
-  P4REN |= SW1;   // Enable pullup resistor
-
+  // Configure switch 1
+  GPIO_setAsInputPinWithPullUpResistor(PORT4, SW1);
+  GPIO_selectInterruptEdge(PORT4, SW1, GPIO_HIGH_TO_LOW_TRANSITION);
+  GPIO_clearInterrupt(PORT4, SW1);
+  GPIO_enableInterrupt(PORT4, SW1);
+  
   P4SEL0 |= UCA1TXD;  // USCI_A1 UART operation
   P4SEL1 &= ~UCA1TXD; // USCI_A1 UART operation
 
@@ -216,39 +215,32 @@ void init_port_5(void) {
 void init_port_6(void) {
   P6OUT = 0x00; // P6 set Low
   P6DIR = 0x00; // Set P6 direction to output
+  
+  // Configure LCD_BACKLITE as default low GPIO output
+  GPIO_setAsOutputPin(PORT6, LCD_BACKLITE);
+  GPIO_setOutputLowOnPin(PORT6, LCD_BACKLITE);
+  
+  // Configure R_FORWARD as default low GPIO output
+  GPIO_setAsOutputPin(PORT6, R_FORWARD);
+  GPIO_setOutputLowOnPin(PORT6, R_FORWARD);
+  
+  // Configure L_FORWARD as default low GPIO output
+  GPIO_setAsOutputPin(PORT6, L_FORWARD);
+  GPIO_setOutputLowOnPin(PORT6, L_FORWARD);
+  
+  // Configure R_REVERSE as default low GPIO output
+  GPIO_setAsOutputPin(PORT6, R_REVERSE);
+  GPIO_setOutputLowOnPin(PORT6, R_REVERSE);
+  
+  // Configure L_REVERSE as default low GPIO output
+  GPIO_setAsOutputPin(PORT6, L_REVERSE);
+  GPIO_setOutputLowOnPin(PORT6, L_REVERSE);
 
-  P6SEL0 &= ~LCD_BACKLITE;
-  P6SEL1 &= ~LCD_BACKLITE;
-  P6OUT &= ~LCD_BACKLITE;
-  P6DIR |= LCD_BACKLITE;
+  // Unused, set to low input
+  GPIO_setAsInputPin(PORT6, PIN5);
+  GPIO_setOutputLowOnPin(PORT6, PIN5);
 
-  P6SEL0 &= ~R_FORWARD;
-  P6SEL1 &= ~R_FORWARD;
-  P6OUT &= ~R_FORWARD;
-  P6DIR |= R_FORWARD;
-
-  P6SEL0 &= ~L_FORWARD;
-  P6SEL1 &= ~L_FORWARD;
-  P6OUT &= ~L_FORWARD;
-  P6DIR |= L_FORWARD;
-
-  P6SEL0 &= ~R_REVERSE;
-  P6SEL1 &= ~R_REVERSE;
-  P6OUT &= ~R_REVERSE;
-  P6DIR &= ~R_REVERSE;
-
-  P6SEL0 &= ~L_REVERSE;
-  P6SEL1 &= ~L_REVERSE;
-  P6OUT &= ~L_REVERSE;
-  P6DIR &= ~L_REVERSE;
-
-  P6SEL0 &= ~P6_5;
-  P6SEL1 &= ~P6_5;
-  P6OUT &= ~P6_5;
-  P6DIR &= ~P6_5;
-
-  P6SEL0 &= ~GRN_LED;
-  P6SEL1 &= ~GRN_LED;
-  P6OUT |= GRN_LED;
-  P6DIR |= GRN_LED;
+  // Configure GRN_LED as default high GPIO
+  GPIO_setAsOutputPin(PORT6, GRN_LED);
+  GPIO_setOutputHighOnPin(PORT6, GRN_LED);
 }

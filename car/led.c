@@ -3,6 +3,7 @@
 #include "include/global.h"
 #include "include/init.h"
 #include "include/ports.h"
+#include "include/timers.h"
 #include "msp430.h"
 
 void carlson_state_machine(void) {

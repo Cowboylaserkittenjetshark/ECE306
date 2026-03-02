@@ -1,18 +1,16 @@
 #ifndef SWITCHES_H
 #define SWITCHES_H
 
-void Init_Switches(void);
-void switch_control(void);
-void enable_switch_SW1(void);
-void enable_switch_SW2(void);
-void disable_switch_SW1(void);
-void disable_switch_SW2(void);
-void Switches_Process(void);
-void Init_Switch(void);
-void Switch_Process(void);
-void Switch1_Process(void);
-void Switch2_Process(void);
-void menu_act(void);
-void menu_select(void);
+#include <stdbool.h>
+#include "msp430.h"
+
+#define DEBOUNCE_TIME (5)
+
+void switches_process(void);
+void sw1_process(void);
+void sw2_process(void);
+
+__interrupt void p4_interrupt(void);
+__interrupt void p2_interrupt(void);
 
 #endif

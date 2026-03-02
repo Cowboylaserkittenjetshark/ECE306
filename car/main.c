@@ -7,7 +7,6 @@
 #include "include/ports.h"
 #include "include/shapes.h"
 #include "include/switches.h"
-#include "include/switches_addons.h"
 #include "include/timers.h"
 #include "msp430.h"
 #include <stdbool.h>
@@ -21,13 +20,8 @@ void main(void) {
   init_ports();      // Initialize Ports
   init_clocks();     // Initialize Clock System
   init_conditions(); // Initialize Variables and Initial Conditions
-  Init_Timers();     // Initialize Timers
+  init_timers();     // Initialize Timers
   Init_LCD();        // Initialize LCD
-  strcpy(display_line[0], "   NCSU   ");
-  strcpy(display_line[1], " WOLFPACK ");
-  strcpy(display_line[2], "  ECE306  ");
-  strcpy(display_line[3], "  GP I/O  ");
-  display_changed = true;
 
   // Begining of the "While" Operating System
   while (true) {
@@ -36,7 +30,63 @@ void main(void) {
       cycle_time += 1;
       time_change = true;
     }
-    shape_state_machine();
+    if (time_change) {
+      time_change = false;
+      switch (cycle_time) {
+        case 0:
+          motors_off();
+          strcpy(display_line[0], " WAIT     ");
+          break;
+        case 5:
+          motors_forward();
+          strcpy(display_line[0], " FORWARD  ");
+          break;
+        case 10:
+          motors_off();
+          strcpy(display_line[0], " PAUSE    ");
+          break;
+        case 15:
+          motors_reverse();
+          strcpy(display_line[0], " REVERSE  ");
+          break; 
+        case 25:
+          motors_off();
+          strcpy(display_line[0], " PAUSE    ");
+          break;
+        case 30:
+          motors_forward();
+          strcpy(display_line[0], " FORWARD  ");
+          break;
+        case 35:
+          motors_off();
+          strcpy(display_line[0], " PAUSE    ");
+          break;
+        case 40:
+          left_motor_reverse();
+          right_motor_forward();
+          strcpy(display_line[0], " CW       ");
+          break;
+        case 55:
+          motors_off();
+          strcpy(display_line[0], " PAUSE    ");
+          break;
+        case 65:
+          left_motor_forward();
+          right_motor_reverse();
+          strcpy(display_line[0], " CCW      ");
+          break;
+        case 80:
+          motors_off();
+          strcpy(display_line[0], " PAUSE    ");
+          break;
+        case 90:
+          motors_off();
+          cycle_time = 0;
+          break;
+        default: break;
+      }
+      display_changed = 1;
+    }
     switches_process();
     display_process();   // Update Display
     P3OUT ^= TEST_PROBE; // Change State of TEST_PROBE OFF

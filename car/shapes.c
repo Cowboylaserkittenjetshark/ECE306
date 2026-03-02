@@ -101,10 +101,6 @@ void run_circle(void) {
       if (cycle_time >= PERIOD) {
         cycle_time = 0;
         period_count += 1;
-        // if (CIRCLE_MAJOR_DUTY > 0)
-        //   left_motor_forward();
-        // if (CIRCLE_MINOR_DUTY > 0)
-        //   right_motor_forward();
       }
     } else
       set_state(END);
@@ -123,8 +119,6 @@ void run_triangle(void) {
         if (cycle_time >= PERIOD) {
           cycle_time = 0;
           period_count += 1;
-          // if (TRIANGLE_STRAIGHT_DUTY > 0)
-          //   motors_forward();
         }
       } else if (triangle_segment < 5) {
         triangle_state = TURN;
@@ -145,10 +139,6 @@ void run_triangle(void) {
         if (cycle_time >= PERIOD) {
           cycle_time = 0;
           period_count += 1;
-          // if (TRIANGLE_MAJOR_DUTY > 0)
-          //   left_motor_forward();
-          // if (TRIANGLE_MINOR_DUTY > 0)
-          //   right_motor_forward();
         }
       } else if (triangle_segment < 5) {
         triangle_state = STRAIGHT;
@@ -181,10 +171,6 @@ void run_figure_eight(void) {
         if (cycle_time >= PERIOD) {
           cycle_time = 0;
           period_count += 1;
-          // if (CIRCLE_MAJOR_DUTY > 0)
-          //   left_motor_forward();
-          // if (CIRCLE_MINOR_DUTY > 0)
-          //   right_motor_forward();
         }
       } else {
         period_count = 0;
