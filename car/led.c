@@ -1,9 +1,11 @@
 #include "include/led.h"
-#include "include/display.h"
 #include "include/global.h"
-#include "include/init.h"
 #include "include/ports.h"
+
+#include "include/display.h"
+#include "include/init.h"
 #include "include/timers.h"
+
 #include "msp430.h"
 
 void carlson_state_machine(void) {

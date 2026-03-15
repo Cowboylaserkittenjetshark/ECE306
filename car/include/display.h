@@ -109,4 +109,6 @@ int wait_for_character(void);
 void print_CR(void);
 void outchar(char character);
 
+void toggle_backlight(void);
+
 #endif

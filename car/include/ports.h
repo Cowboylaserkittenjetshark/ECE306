@@ -81,7 +81,7 @@
 #define V_5_0        (PIN1) // 5.1 V_5_0
 #define V_DAC        (PIN2) // 5.2 V_DAC
 #define V_3_3        (PIN3) // 5.3 V_3_3
-#define IOT_BOOT_CPU (PIN4) // 5.4 IOT_BOOT
+#define IOT_BOOT (PIN4) // 5.4 IOT_BOOT
 
 // Port 6 Pins
 #define LCD_BACKLITE (PIN0) // 6.0 LCD_BACKLITE
