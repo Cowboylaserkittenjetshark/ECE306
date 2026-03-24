@@ -11,4 +11,6 @@ void init_timers(void);
 void init_timer_b0(void);
 __interrupt void timer_b0_interrupt(void);
 
+void init_timer_b3(void);
+
 #endif

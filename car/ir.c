@@ -18,7 +18,7 @@ void line_process() {
             if((Time_Sequence - pause_time_start) > PAUSE_TIME) set_line_state(SEARCH);
             break;
         case SEARCH:
-            motors_forward();
+            motors_forward(PWM_DUTY_MAX);
             if (left_ir > BLACK_LEVEL && right_ir > BLACK_LEVEL) {
                 motors_off();
                 set_line_state(PAUSE);
@@ -29,8 +29,8 @@ void line_process() {
             if((Time_Sequence - pause_time_start) > PAUSE_TIME) set_line_state(ALIGN);
             break;
         case ALIGN:
-            left_motor_reverse();
-            right_motor_forward();
+            motor_reverse(MOTOR_LEFT, PWM_DUTY_MAX);
+            motor_forward(MOTOR_RIGHT, PWM_DUTY_MAX);
             if(left_ir > BLACK_LEVEL) {
                 motors_off();
                 if(right_ir < left_ir) set_line_state(END);
