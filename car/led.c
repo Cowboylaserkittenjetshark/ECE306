@@ -49,3 +49,11 @@ void carlson_state_machine(void) {
     break;
   }
 }
+
+inline void red_led_on() {
+  P1OUT |= RED_LED;
+}
+
+inline void red_led_off() {
+  P1OUT &= ~RED_LED;
+}

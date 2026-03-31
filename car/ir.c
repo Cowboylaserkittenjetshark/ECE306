@@ -4,6 +4,7 @@
 
 #include "include/timers.h"
 #include "include/motors.h"
+#include "include/pwm.h"
 
 #include <stdio.h>
 #include <string.h>

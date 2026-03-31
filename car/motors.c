@@ -132,7 +132,7 @@ void motor_set(MotorSide side, uint32_t pct, MotorDir dir) {
   }
 }
 
-motors_set(uint32_t pct, MotorDir dir) {
+void motors_set(uint32_t pct, MotorDir dir) {
   motor_set(MOTOR_LEFT, pct, dir);
   motor_set(MOTOR_RIGHT, pct, dir);
 }

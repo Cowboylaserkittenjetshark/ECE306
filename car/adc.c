@@ -1,9 +1,12 @@
 #include <driverlib.h>
 #include "include/adc.h"
 #include "include/ir.h"
+#include "include/ports.h"
 
 void init_adc(void) {
   current_channel = 2;
+  vbat = 0;
+  
   ADCCTL0 = 0;
   ADCCTL0 |= ADCSHT;
   ADCCTL0 |= ADCMSC;
@@ -43,6 +46,7 @@ __interrupt void adc_interrupt(void) {
           ADCMCTL0 &= ~ADCINCH_2;
           ADCMCTL0 |= ADCINCH_3;
           current_channel = 3;
+          ADCCTL0 |= ADCSC;
           break;
         case 3:
           right_ir = ADCMEM0;
@@ -50,6 +54,7 @@ __interrupt void adc_interrupt(void) {
           ADCMCTL0 &= ~ADCINCH_3;
           ADCMCTL0 |= ADCINCH_5;
           current_channel = 5;
+          ADCCTL0 |= ADCSC;
           break;
         case 5:
           thumb = ADCMEM0;
@@ -57,9 +62,14 @@ __interrupt void adc_interrupt(void) {
           ADCMCTL0 |= ADCINCH_2;
           current_channel = 2;
           break;
+        case 10:
+          vbat = ADCMEM0;
+          ADCMCTL0 &= ~ADCINCH_10;
+          ADCMCTL0 |= ADCINCH_2;
+          current_channel = 2;
+          break;
       }
       ADCCTL0 |= ADCENC;
-      ADCCTL0 |= ADCSC;
       break;
     default: break;
   }

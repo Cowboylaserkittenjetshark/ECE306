@@ -8,4 +8,7 @@ void carlson_state_machine(void);
 void IR_LED_control(char selection);
 void Backlite_control(char selection);
 
+inline void red_led_on(void);
+inline void red_led_off(void);
+
 #endif

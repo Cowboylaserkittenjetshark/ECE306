@@ -152,6 +152,7 @@
                                 <option id="com.ti.ccstudio.buildDefinitions.MSP430_21.6.compilerID.OTHER_FLAGS.1563269040" superClass="com.ti.ccstudio.buildDefinitions.MSP430_21.6.compilerID.OTHER_FLAGS" valueType="stringList">
                                     <listOptionValue value=""/>
                                 </option>
+                                <option id="com.ti.ccstudio.buildDefinitions.MSP430_21.6.compilerID.OPT_LEVEL.release.1099454075" superClass="com.ti.ccstudio.buildDefinitions.MSP430_21.6.compilerID.OPT_LEVEL.release" value="com.ti.ccstudio.buildDefinitions.MSP430_21.6.compilerID.OPT_LEVEL.3" valueType="enumerated"/>
                             </tool>
                             <tool id="com.ti.ccstudio.buildDefinitions.MSP430_21.6.exe.linkerRelease.1879946711" name="MSP430 Linker" superClass="com.ti.ccstudio.buildDefinitions.MSP430_21.6.exe.linkerRelease">
                                 <option id="com.ti.ccstudio.buildDefinitions.MSP430_21.6.linkerID.DEFINE.1567225699" superClass="com.ti.ccstudio.buildDefinitions.MSP430_21.6.linkerID.DEFINE" valueType="definedSymbols">

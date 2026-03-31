@@ -3,8 +3,9 @@
 #include "include/global.h"
 
 #include "include/pwm.h"
+#include "include/dac.h"
+#include "include/led.h"
 #include <stdint.h>
-volatile uint16_t lcd_dbg = 0;
 
 void init_timers(void) {
     init_timer_b0();
@@ -33,6 +34,14 @@ __interrupt void timer_b0_interrupt(void) {
     update_display = 1;
     update_display_count += 1;
     one_time = 1;
+    ADCCTL0 |= ADCSC;
+
+    switch (__even_in_range(TB0IV, 14)) {
+        case 14:
+            dac_adjust();
+            break;
+        default: break;
+    }
 }
 
 void init_timer_b3(void) {
@@ -41,7 +50,6 @@ void init_timer_b3(void) {
     PWM_PERIOD = INITIAL_PWM_PERIOD;
 
     TB3CCTL1 = OUTMOD_7;
-    lcd_dbg = pwm_pct(80);
     LCD_BACKLIGHT_DUTY = pwm_pct(80);
 
     TB3CCTL2 = OUTMOD_7;

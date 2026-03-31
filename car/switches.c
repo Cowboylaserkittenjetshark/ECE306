@@ -7,7 +7,7 @@
 
 // Switch actions
 #include "include/display.h"
-#include "include/ir.h"
+#include "include/serial.h"
 
 volatile bool sw1_pressed = false;
 volatile bool sw2_pressed = false;
@@ -24,16 +24,18 @@ void switches_process(void) {
 void sw1_process(void) {
   if (sw1_pressed) {
       sw1_pressed = false;
-      display_line[3][6] = (1 + 48);
-      set_line_state(WAIT);
+      init_serial_comms('s');
+      UCA1IE |= UCTXIE;
+
   }
 }
 
 void sw2_process(void) {
   if (sw2_pressed) {
     sw2_pressed = false;
-    display_line[3][6] = (2 + 48);
-    toggle_emitter();
+    init_serial_comms('f');
+    UCA1IE |= UCTXIE;
+
  }
 }
 
