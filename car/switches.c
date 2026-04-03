@@ -8,6 +8,7 @@
 // Switch actions
 #include "include/display.h"
 #include "include/comms.h"
+#include "include/menu.h"
 
 volatile bool sw1_pressed = false;
 volatile bool sw2_pressed = false;
@@ -24,14 +25,14 @@ void switches_process(void) {
 void sw1_process(void) {
   if (sw1_pressed) {
       sw1_pressed = false;
-      if(uca0_state == IDLE) uca0_next_state = true;
+      menu_enter();
   }
 }
 
 void sw2_process(void) {
   if (sw2_pressed) {
     sw2_pressed = false;
-    init_serial_comms('f');
+    menu_back();
  }
 }
 

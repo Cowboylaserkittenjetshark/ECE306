@@ -5,6 +5,7 @@
 
 #define BLACK_LEVEL (770)
 #define PAUSE_TIME (5)
+#define THUMB_MAX (4096)
 
 typedef enum line_process_state { START, WAIT, SEARCH, PAUSE, ALIGN, END } LineProcessState;
 
