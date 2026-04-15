@@ -11,6 +11,7 @@
 #include "include/adc.h"
 #include "include/ir.h"
 #include "include/comms.h"
+#include "include/actions.h"
 #include "msp430.h"
 #include <stdbool.h>
 #include <string.h>
@@ -28,7 +29,9 @@ void main(void) {
   init_timers();     // Initialize Timers
   Init_LCD();        // Initialize LCD
   init_adc();        // Initialize ADC
+  init_scheduler();  // Initialize scheduler
   init_serial_comms('s');
+  
 
   // Begining of the "While" Operating System
   while (true) {
@@ -36,8 +39,10 @@ void main(void) {
       last_time_sequence = Time_Sequence;
       cycle_time += 1;
       time_change = true;
+      next_tick = true;
     }
     comms_process();
+    scheduler_process();
     switches_process();
     display_process();   // Update Display
     P3OUT ^= TEST_PROBE; // Change State of TEST_PROBE OFF

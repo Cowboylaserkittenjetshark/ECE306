@@ -16,10 +16,13 @@ static inline void init_serial_uca0(char speed);
 static inline void init_serial_uca1(char speed);
 void comms_process(void);
 static inline void pc_log(const char * msg);
+inline void iot_msg(const char * msg);
 
 bool volatile pc_tx_blocked;
 static volatile char pc_tx_buff[TX_BUFF_LEN + 1];
 static volatile unsigned int pc_tx_id;
+static volatile char iot_tx_buff[TX_BUFF_LEN + 1];
+static volatile unsigned int iot_tx_id;
 
 static volatile CommsState uca0_state;
 static volatile bool cmd_ready;

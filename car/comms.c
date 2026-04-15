@@ -1,6 +1,9 @@
 #include "include/comms.h"
 #include <stdio.h>
 #include "include/global.h"
+#include "include/motors.h"
+#include "include/actions.h"
+#include "include/timers.h"
 #include <string.h>
 #include <stdbool.h>
 
@@ -20,7 +23,28 @@ void comms_process(void) {
                 if(cmd_buff_id < 3) {
                     pc_log("Command too short");
                 } else {
-                    snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Driving %c at %c0", cmd_buff[1], cmd_buff[2]);
+                    snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Driving %c at %d percent", cmd_buff[1], (cmd_buff[2] - '0') * 10);
+                    MotorDir dir;
+                    uint32_t pct;
+                    switch (cmd_buff[1]) {
+                        case 'F':
+                            dir = FWD;
+                            break;
+                        case 'B':
+                            dir = REV;
+                            break;
+                        default:
+                            dir = OFF;
+                            break;
+                    }
+                    if(cmd_buff[2] >= '0' && cmd_buff[2] <= ':') {
+                        pct = (cmd_buff[2] - '0') * 10;
+                    } else {
+                        pct = 0;
+                        dir = OFF;
+                    }
+                    motors_set(pct, dir);
+                    schedule_task(MOTORS_OFF, 10);
                     pc_tx_id = 0;
                     pc_tx_blocked = true;
                     UCA1IE |= UCTXIE; // Enable transmit
@@ -30,7 +54,24 @@ void comms_process(void) {
                 if(cmd_buff_id < 3) {
                     pc_log("Command too short");
                 } else {
-                    snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Turning %c at %c0", cmd_buff[1], cmd_buff[2]);
+                    snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Turning %c at %d percent", cmd_buff[1], (cmd_buff[2] - '0') * 10);
+                    uint32_t pct;
+                    if(cmd_buff[2] >= '0' && cmd_buff[2] <= ':') pct = (cmd_buff[2] - '0') * 10;
+                    else pct = 0;
+                    switch (cmd_buff[1]) {
+                        case 'L':
+                            motor_forward(MOTOR_LEFT, pct);
+                            motor_reverse(MOTOR_RIGHT, pct);
+                            break;
+                        case 'R':
+                            motor_forward(MOTOR_RIGHT, pct);
+                            motor_reverse(MOTOR_LEFT, pct);
+                            break;
+                        default:
+                            motors_off();
+                            break;
+                    }
+                    schedule_task(MOTORS_OFF, 5);
                     pc_tx_id = 0;
                     pc_tx_blocked = true;
                     UCA1IE |= UCTXIE; // Enable transmit
@@ -47,6 +88,9 @@ void comms_process(void) {
 void init_serial_comms(char speed) {
     init_serial_uca0(speed);
     init_serial_uca1(speed);
+    schedule_task(IOT_INIT_1, 20);
+    schedule_task(IOT_INIT_2, 40);
+    schedule_task(IOT_INIT_3, 60);
 }
 
 void init_serial_uca0(char speed) {
@@ -79,6 +123,9 @@ void init_serial_uca0(char speed) {
     UCA0TXBUF = 0x00;
     UCA0IE |= UCRXIE;
 
+    iot_tx_buff[0] = '\0';
+    iot_tx_id = 0;
+    
     uca0_state = NOR;
     cmd_buff_id = 0;
     cmd_ready = false; 
@@ -167,6 +214,14 @@ __interrupt void uca0_interrupt() {
             }
             break;
         case USCI_UART_UCTXIFG:
+            if(iot_tx_id < TX_BUFF_LEN && iot_tx_buff[iot_tx_id] != '\0') {
+                UCA0TXBUF = iot_tx_buff[iot_tx_id];
+                iot_tx_id += 1;
+            } else {
+                UCA0IE &= ~UCTXIE; // Disable transmit
+                iot_tx_buff[0] = '\0';
+                iot_tx_id = 0;
+            }
             break;
         default: break;
     }
@@ -174,48 +229,6 @@ __interrupt void uca0_interrupt() {
 
 #pragma vector=EUSCI_A1_VECTOR
 __interrupt void uca1_interrupt() {
-    // switch(__even_in_range(UCA1IV, USCI_UART_UCTXCPTIFG)) {
-    //     case USCI_NONE: break;
-    //     case USCI_UART_UCRXIFG:
-    //         if(cmd_mode) {
-    //             switch (UCA1RXBUF) {
-    //                 case '^':
-    //                     cmd = TEST;
-    //                     break;
-    //                 case 'F':
-    //                     cmd = SET_BAUD_FAST;
-    //                     break;
-    //                 case 'S':
-    //                     cmd = SET_BAUD_SLOW;
-    //                     break;
-    //                 default:
-    //                     cmd = UNKNOWN;
-    //                     break;
-    //             }
-    //             cmd_mode = false;
-    //         } else {
-    //             if(UCA1RXBUF == '^'){
-    //                 cmd_mode = true;
-    //                 display_line[2][0] = 'T';
-    //                 display_changed = true;
-    //             }
-    //             else if(!pc_tx_blocked) UCA0TXBUF = UCA1RXBUF;
-    //         }
-    //         break;
-    //     case USCI_UART_UCTXIFG:
-    //         if(pc_tx_id < TX_BUFF_LEN && pc_tx_buff[pc_tx_id] != '\0') {
-    //             UCA1TXBUF = pc_tx_buff[pc_tx_id];
-    //             pc_tx_id += 1;
-    //         } else {
-    //             UCA1IE &= ~UCTXIE; // Disable transmit
-    //             uca1txie = false;
-    //             pc_tx_buff[0] = '\0';
-    //             pc_tx_id = 0;
-    //             pc_tx_blocked = false;
-    //         }
-    //         break;
-    //     default: break;
-    // }
     switch(__even_in_range(UCA1IV, USCI_UART_UCTXCPTIFG)) {
         case USCI_NONE: break;
         case USCI_UART_UCRXIFG:
@@ -240,4 +253,11 @@ static inline void pc_log(const char * msg) {
     pc_tx_id = 0;
     pc_tx_blocked = true;
     UCA1IE |= UCTXIE; // Enable transmit
+}
+
+inline void iot_msg(const char * msg) {
+    snprintf(iot_tx_buff, TX_BUFF_LEN - 1, "%s\r\n", msg);
+    iot_tx_id = 0;
+    UCA0TXBUF = 0x00;
+    UCA0IE |= UCTXIE; // Enable transmit
 }
