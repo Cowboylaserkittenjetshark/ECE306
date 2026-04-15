@@ -8,7 +8,7 @@ typedef enum menu_state { SPLASH, MAIN, RESISTOR, SHAPE, SONG } MenuState;
 static volatile MenuState ms;
 static volatile bool ms_changed;
 static volatile unsigned int last_thumb;
-static volatile song_toggle;
+static volatile int song_toggle;
 static volatile unsigned int lyric_offset;
 volatile unsigned int selected_index;
 

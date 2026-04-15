@@ -63,7 +63,7 @@ void init_port_2(void) {
 
   // Configure IOT_RUN_RED as default low GPIO
   GPIO_setAsOutputPin(PORT2, IOT_RUN_RED);
-  GPIO_setOutputLowOnPin(PORT2, IOT_RUN_RED);
+  GPIO_setOutputHighOnPin(PORT2, IOT_RUN_RED);
 
   // Configure DAC_ENB as default high GPIO
   GPIO_setAsOutputPin(PORT2, DAC_ENB);
@@ -108,15 +108,17 @@ void init_port_3(void) {
 
   P3SELC |= DAC_CNTL;
 
-  P3SEL0 |= IOT_LINK_GRN;
-  P3SEL1 |= IOT_LINK_GRN;
+  P3SEL0 &= ~IOT_LINK_GRN;
+  P3SEL1 &= ~IOT_LINK_GRN;
   P3OUT &= ~IOT_LINK_GRN;
   P3DIR &= ~IOT_LINK_GRN;
 
-  P3SEL0 |= IOT_EN;
-  P3SEL1 |= IOT_EN;
+  P3SEL0 &= ~IOT_EN;
+  P3SEL1 &= ~IOT_EN;
   P3OUT &= ~IOT_EN;
-  P3DIR &= ~IOT_EN;
+  P3DIR |= IOT_EN;
+  __delay_cycles(100);
+  P3OUT |= IOT_EN;
 }
 
 // Configure port 4
@@ -168,8 +170,8 @@ void init_port_5(void) {
 
   P5SEL0 &= ~IOT_BOOT;
   P5SEL1 &= ~IOT_BOOT;
-  P5OUT &= ~IOT_BOOT;
-  P5DIR &= ~IOT_BOOT;
+  P5OUT |= ~IOT_BOOT;
+  P5DIR |= ~IOT_BOOT;
 }
 
 // Configure port 6

@@ -1,21 +1,30 @@
 #ifndef COMMS_H
 #define COMMS_H
 
-#define CMD_LENGTH (10)
-
 #include "msp430.h"
 #include <stdbool.h>
 
-typedef enum comms_state { RX, IDLE, TX } CommsState;
+#define TX_BUFF_LEN (32)
+#define MAX_ARGS (2)
+
+typedef enum command { NONE, UNKNOWN, TEST, DRIVE, TURN, SET_BAUD_FAST, SET_BAUD_SLOW } Command;
+typedef enum comms_state { NOR, CMD, ARGS, END_CR, END_LF } CommsState;
 
 void init_serial_comms(char speed);
 static inline void init_serial_uca0(char speed);
 static inline void init_serial_uca1(char speed);
 void comms_process(void);
+static inline void pc_log(const char * msg);
+static inline void iot_cmd_done(Command c);
 
-CommsState uca0_state;
-bool uca0_next_state;
-char cmdbuf[CMD_LENGTH + 1];
-unsigned int cmdid;
+static volatile bool cmd_mode;
+bool volatile pc_tx_blocked;
+static volatile Command cmd;
+static volatile char pc_tx_buff[TX_BUFF_LEN + 1];
+static volatile unsigned int pc_tx_id;
+static volatile CommsState uca0_state;
+static volatile char cmd_args[MAX_ARGS];
+static volatile unsigned int cmd_arg_id;
+static volatile bool cmd_ready;
 
 #endif
