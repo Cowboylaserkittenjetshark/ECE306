@@ -6,6 +6,7 @@
 
 #define TX_BUFF_LEN (32)
 #define MAX_ARGS (2)
+#define CMD_LEN (3)
 
 typedef enum command { NONE, UNKNOWN, TEST, DRIVE, TURN, SET_BAUD_FAST, SET_BAUD_SLOW } Command;
 typedef enum comms_state { NOR, CMD, ARGS, END_CR, END_LF } CommsState;
@@ -15,16 +16,14 @@ static inline void init_serial_uca0(char speed);
 static inline void init_serial_uca1(char speed);
 void comms_process(void);
 static inline void pc_log(const char * msg);
-static inline void iot_cmd_done(Command c);
 
-static volatile bool cmd_mode;
 bool volatile pc_tx_blocked;
-static volatile Command cmd;
 static volatile char pc_tx_buff[TX_BUFF_LEN + 1];
 static volatile unsigned int pc_tx_id;
+
 static volatile CommsState uca0_state;
-static volatile char cmd_args[MAX_ARGS];
-static volatile unsigned int cmd_arg_id;
 static volatile bool cmd_ready;
+static volatile char cmd_buff[CMD_LEN + 1];
+static volatile unsigned int cmd_buff_id;
 
 #endif

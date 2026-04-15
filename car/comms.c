@@ -4,32 +4,42 @@
 #include <string.h>
 #include <stdbool.h>
 
-volatile bool uca1txie = false;
-
 void comms_process(void) {
     if(cmd_ready) {
-        switch (cmd) {
-            case TEST:
-                pc_log("I'm a list comprehension");
+        switch (cmd_buff[0]) {
+            case '^':
+                pc_log("TEST");
                 break;
-            case SET_BAUD_FAST:
-                pc_log("Setting high baud");
+            case 'F':
+                pc_log("FAST BAUD");
                 break;
-            case SET_BAUD_SLOW:
-                pc_log("Setting low baud");
+            case 'S':
+                pc_log("SLOW BAUD");
                 break;
-            case DRIVE:
-                pc_log("Driving");
+            case 'D':
+                if(cmd_buff_id < 3) {
+                    pc_log("Command too short");
+                } else {
+                    snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Driving %c at %c0", cmd_buff[1], cmd_buff[2]);
+                    pc_tx_id = 0;
+                    pc_tx_blocked = true;
+                    UCA1IE |= UCTXIE; // Enable transmit
+                }
                 break;
-            case TURN:
-                pc_log("Turning");
+            case 'T':
+                if(cmd_buff_id < 3) {
+                    pc_log("Command too short");
+                } else {
+                    snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Turning %c at %c0", cmd_buff[1], cmd_buff[2]);
+                    pc_tx_id = 0;
+                    pc_tx_blocked = true;
+                    UCA1IE |= UCTXIE; // Enable transmit
+                }
                 break;
-            case UNKNOWN:
-                pc_log("Unknown command");
+            default:
+                pc_log("Unknown");
                 break;
-            default: break;
         }
-        cmd = NONE;
         cmd_ready = false;
     }
 }
@@ -70,8 +80,7 @@ void init_serial_uca0(char speed) {
     UCA0IE |= UCRXIE;
 
     uca0_state = NOR;
-    cmd = NONE;
-    cmd_arg_id = 0;
+    cmd_buff_id = 0;
     cmd_ready = false; 
 }
 
@@ -112,59 +121,33 @@ void init_serial_uca1(char speed) {
 
 #pragma vector=EUSCI_A0_VECTOR
 __interrupt void uca0_interrupt() {
+    char iot_rx_char;
     switch(__even_in_range(UCA0IV, USCI_UART_UCTXCPTIFG)) {
         case USCI_NONE: break;
         case USCI_UART_UCRXIFG:
+            iot_rx_char = UCA0RXBUF;
             switch (uca0_state) {
                 case NOR:
-                    if(UCA0RXBUF == '^') uca0_state = CMD;
-                    else UCA1TXBUF = UCA0RXBUF;
+                    if(iot_rx_char == '^') {
+                        uca0_state = CMD;
+                        cmd_ready = false;
+                        cmd_buff_id = 0;
+                    }
+                    else UCA1TXBUF = iot_rx_char;
                     break;
                 case CMD:
-                    switch (UCA0RXBUF) {
-                        case '^':
-                            iot_cmd_done(TEST);
-                            break;
-                        case 'F':
-                            iot_cmd_done(SET_BAUD_FAST);
-                            break;
-                        case 'S':
-                            iot_cmd_done(SET_BAUD_SLOW);
-                            break;
-                        case 'D':
-                            cmd = DRIVE;
-                            uca0_state = ARGS;
-                            break;
-                        case 'T':
-                            cmd = TURN;
-                            uca0_state = ARGS;
-                            break;
-                        default:
-                            iot_cmd_done(UNKNOWN);
-                            break;
-                    }
-                    break;
-                case ARGS:
-                    switch (UCA0RXBUF) {
+                    switch (iot_rx_char) {
                         case '\r':
+                            uca0_state = END_LF;
+                            break;
                         case '\n':
-                            iot_cmd_done(UNKNOWN);
+                            uca0_state = NOR;
+                            if(cmd_buff_id > 0) cmd_ready = true;
                             break;
                         default:
-                            switch (cmd) {
-                                case DRIVE:
-                                case TURN:
-                                    if(cmd_arg_id >= 2) {
-                                        cmd_arg_id = 0;
-                                        uca0_state = END_CR;
-                                    } else {
-                                        cmd_args[cmd_arg_id] = UCA0RXBUF;
-                                        cmd_arg_id += 1;
-                                    }
-                                    break;
-                                default:
-                                    iot_cmd_done(UNKNOWN);
-                                    break;
+                            if(cmd_buff_id <= CMD_LEN) {
+                                cmd_buff[cmd_buff_id] = iot_rx_char;
+                                cmd_buff_id += 1;
                             }
                             break;
                     }
@@ -174,9 +157,12 @@ __interrupt void uca0_interrupt() {
                     break;
                 case END_LF:
                     if(UCA0RXBUF == '\n') uca0_state = NOR;
+                    if(cmd_buff_id > 0) cmd_ready = true;
                     break;
                 default:
                     uca0_state = NOR;
+                    cmd_buff_id = 0;
+                    cmd_ready = false;
                     break;
             }
             break;
@@ -184,13 +170,6 @@ __interrupt void uca0_interrupt() {
             break;
         default: break;
     }
-}
-
-static inline void iot_cmd_done(const Command c) {
-    cmd = c;
-    cmd_arg_id = 0;
-    uca0_state = END_CR;
-    cmd_ready = true;
 }
 
 #pragma vector=EUSCI_A1_VECTOR
@@ -247,7 +226,6 @@ __interrupt void uca1_interrupt() {
                 pc_tx_id += 1;
             } else {
                 UCA1IE &= ~UCTXIE; // Disable transmit
-                uca1txie = false;
                 pc_tx_buff[0] = '\0';
                 pc_tx_id = 0;
                 pc_tx_blocked = false;
@@ -260,7 +238,6 @@ __interrupt void uca1_interrupt() {
 static inline void pc_log(const char * msg) {
     snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "%s", msg);
     pc_tx_id = 0;
-    pc_tx_blocked = false;
+    pc_tx_blocked = true;
     UCA1IE |= UCTXIE; // Enable transmit
-    uca1txie = true;
 }

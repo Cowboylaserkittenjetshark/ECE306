@@ -15,4 +15,8 @@ void motors_reverse(uint32_t pct);
 void motor_off(MotorSide side);
 void motors_off(void);
 
+void forward_for(uint32_t duration, uint32_t pct);
+void turn_left_for(uint32_t duration, uint32_t pct);
+void turn_right_for(uint32_t duration, uint32_t pct);
+
 #endif
