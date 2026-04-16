@@ -7,6 +7,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+const char iot_init_frame[IOT_INIT_FRAME_LEN][TX_BUFF_LEN] = { "AT+CIPSTAMAC=\"E0:51:D8:21:6A:E4\"", "AT+SYSSTORE=0", "AT+CIPMUX=1", "AT+CIPSERVER=1,3108" };
+
 void comms_process(void) {
     if(cmd_ready) {
         switch (cmd_buff[0]) {
@@ -88,9 +90,11 @@ void comms_process(void) {
 void init_serial_comms(char speed) {
     init_serial_uca0(speed);
     init_serial_uca1(speed);
-    schedule_task(IOT_INIT_1, 20);
-    schedule_task(IOT_INIT_2, 40);
-    schedule_task(IOT_INIT_3, 60);
+    iot_init_frame_id = 0;
+    unsigned int i;
+    for(i = 1; i <= IOT_INIT_FRAME_LEN; i += 1) {
+        schedule_task(IOT_INIT, 10 * i);
+    }
 }
 
 void init_serial_uca0(char speed) {

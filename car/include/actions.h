@@ -5,7 +5,7 @@
 
 #define MAX_TASKS (16)
 
-typedef enum action { MOTORS_OFF, IOT_INIT_1, IOT_INIT_2, IOT_INIT_3 } Action;
+typedef enum action { MOTORS_OFF, IOT_INIT } Action;
 typedef struct task {
     Action act;
     unsigned int ticks; 

@@ -4,13 +4,16 @@
 #include "msp430.h"
 #include <stdbool.h>
 
-#define TX_BUFF_LEN (32)
+#define TX_BUFF_LEN (64)
 #define MAX_ARGS (2)
 #define CMD_LEN (3)
+#define IOT_INIT_FRAME_LEN (4)
 
 typedef enum command { NONE, UNKNOWN, TEST, DRIVE, TURN, SET_BAUD_FAST, SET_BAUD_SLOW } Command;
 typedef enum comms_state { NOR, CMD, ARGS, END_CR, END_LF } CommsState;
 
+extern const char iot_init_frame[IOT_INIT_FRAME_LEN][TX_BUFF_LEN];
+volatile unsigned int iot_init_frame_id;
 void init_serial_comms(char speed);
 static inline void init_serial_uca0(char speed);
 static inline void init_serial_uca1(char speed);

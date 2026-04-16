@@ -30,14 +30,9 @@ void execute_action(Action act) {
         case MOTORS_OFF:
             motors_off();
             break;
-        case IOT_INIT_1:
-            iot_msg("AT+SYSSTORE=0");
-            break;
-        case IOT_INIT_2:
-            iot_msg("AT+CIPMUX=1");
-            break;
-        case IOT_INIT_3:
-            iot_msg("AT+CIPSERVER=1,8080");
+        case IOT_INIT:
+            iot_msg(iot_init_frame[iot_init_frame_id]);
+            iot_init_frame_id += 1;
             break;
         default: break;
     }
