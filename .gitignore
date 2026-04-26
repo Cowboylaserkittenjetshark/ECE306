@@ -7,3 +7,4 @@ Release/
 .theia/
 dvt/
 .clangd
+flash_tools/

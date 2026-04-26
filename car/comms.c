@@ -25,31 +25,8 @@ void comms_process(void) {
                 if(cmd_buff_id < 3) {
                     pc_log("Command too short");
                 } else {
-                    snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Driving %c at %d percent", cmd_buff[1], (cmd_buff[2] - '0') * 10);
-                    MotorDir dir;
-                    uint32_t pct;
-                    switch (cmd_buff[1]) {
-                        case 'F':
-                            dir = FWD;
-                            break;
-                        case 'B':
-                            dir = REV;
-                            break;
-                        default:
-                            dir = OFF;
-                            break;
-                    }
-                    if(cmd_buff[2] >= '0' && cmd_buff[2] <= ':') {
-                        pct = (cmd_buff[2] - '0') * 10;
-                    } else {
-                        pct = 0;
-                        dir = OFF;
-                    }
-                    motors_set(pct, dir);
-                    schedule_task(MOTORS_OFF, 10);
-                    pc_tx_id = 0;
-                    pc_tx_blocked = true;
-                    UCA1IE |= UCTXIE; // Enable transmit
+                    motor_set_bidir(MOTOR_LEFT, cmd_buff[1]);
+                    motor_set_bidir(MOTOR_RIGHT, cmd_buff[2]);
                 }
                 break;
             case 'T':

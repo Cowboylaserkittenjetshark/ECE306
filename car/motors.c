@@ -1,5 +1,6 @@
 #include "include/motors.h"
 #include "include/ports.h"
+#include "include/global.h"
 #include "msp430.h"
 #include <driverlib.h>
 
@@ -130,9 +131,34 @@ void motor_set(MotorSide side, uint32_t pct, MotorDir dir) {
       break;
     default: break;
   }
+  display_motors();
+}
+
+void motor_set_bidir(MotorSide side, uint32_t pct_bi) {
+  MotorDir dir;
+  uint32_t pct = (pct_bi * 200) / 255;
+  if(pct > (100 + DEADZONE)) {
+    dir = FWD;
+    pct -= 100;
+  }
+  else if(pct < (100 - DEADZONE)) {
+    dir = REV;
+    pct = 100 - pct;
+  } else {
+    dir = OFF;
+    pct = 0;
+  }
+
+  motor_set(side, pct, dir);
 }
 
 void motors_set(uint32_t pct, MotorDir dir) {
   motor_set(MOTOR_LEFT, pct, dir);
   motor_set(MOTOR_RIGHT, pct, dir);
+}
+
+static inline void display_motors() {
+  snprintf(display_line[0], 11, " %d | %d  ", LEFT_FORWARD_DUTY, RIGHT_FORWARD_DUTY);
+  snprintf(display_line[2], 11, " %d | %d  ", LEFT_REVERSE_DUTY, RIGHT_REVERSE_DUTY);
+  display_changed = true;
 }

@@ -3,10 +3,13 @@
 #include <stdio.h>
 #include <stdint.h>
 
-typedef enum motor_dir { REV, OFF, FWD } MotorDir;
+#define DEADZONE (10)
+
+typedef enum motor_dir { REV = 'R', OFF = 'O', FWD = 'F' } MotorDir;
 typedef enum motor_side { MOTOR_LEFT, MOTOR_RIGHT } MotorSide;
 
 void motor_set(MotorSide side, uint32_t pct, MotorDir dir);
+void motor_set_bidir(MotorSide side, uint32_t pct_bi);
 void motors_set(uint32_t pct, MotorDir dir);
 void motor_forward(MotorSide side, uint32_t pct);
 void motors_forward(uint32_t pct);
@@ -14,5 +17,6 @@ void motor_reverse(MotorSide side, uint32_t pct);
 void motors_reverse(uint32_t pct);
 void motor_off(MotorSide side);
 void motors_off(void);
+static inline void display_motors(void);
 
 #endif

@@ -32,7 +32,6 @@ void main(void) {
   init_scheduler();  // Initialize scheduler
   init_serial_comms('s');
   
-
   // Begining of the "While" Operating System
   while (true) {
     if (Time_Sequence != last_time_sequence) {
