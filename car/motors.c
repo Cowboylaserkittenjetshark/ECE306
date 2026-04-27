@@ -12,27 +12,13 @@ volatile MotorDir right_motor_state = OFF;
 void motor_off(MotorSide side) {
   switch (side) {
     case MOTOR_LEFT:
-      switch (left_motor_state) {
-        case FWD:
-          LEFT_FORWARD_DUTY = PWM_DUTY_MIN;
-          break;
-        case REV:
-          LEFT_REVERSE_DUTY = PWM_DUTY_MIN;
-          break;
-        default: break;
-      }
+      LEFT_FORWARD_DUTY = PWM_DUTY_MIN;
+      LEFT_REVERSE_DUTY = PWM_DUTY_MIN;
       left_motor_state = OFF;
       break;
     case MOTOR_RIGHT:
-      switch (right_motor_state) {
-        case FWD:
-          RIGHT_FORWARD_DUTY = PWM_DUTY_MIN;
-          break;
-        case REV:
-          RIGHT_REVERSE_DUTY = PWM_DUTY_MIN;
-          break;
-        default: break;
-      }
+      RIGHT_FORWARD_DUTY = PWM_DUTY_MIN;
+      RIGHT_REVERSE_DUTY = PWM_DUTY_MIN;
       right_motor_state = OFF;
       break;
     default: break;
@@ -47,7 +33,9 @@ void motors_off() {
 void motor_forward(MotorSide side, uint32_t pct) {
   switch (side) {
     case MOTOR_LEFT:
+      left_motor_pwm = pwm_pct(pct);
       switch (left_motor_state) {
+        case FWD:
         case OFF:
           LEFT_FORWARD_DUTY = pwm_pct(pct);
           left_motor_state = FWD;
@@ -60,7 +48,9 @@ void motor_forward(MotorSide side, uint32_t pct) {
       }
       break;
     case MOTOR_RIGHT:
+      right_motor_pwm = pwm_pct(pct);
       switch (right_motor_state) {
+        case FWD:
         case OFF:
           RIGHT_FORWARD_DUTY = pwm_pct(pct);
           right_motor_state = FWD;
@@ -85,6 +75,7 @@ void motor_reverse(MotorSide side, uint32_t pct) {
   switch (side) {
     case MOTOR_LEFT:
       switch (left_motor_state) {
+        case REV:
         case OFF:
           LEFT_REVERSE_DUTY = pwm_pct(pct);
           left_motor_state = REV;
@@ -98,6 +89,7 @@ void motor_reverse(MotorSide side, uint32_t pct) {
       break;
     case MOTOR_RIGHT:
       switch (right_motor_state) {
+        case REV:
         case OFF:
           RIGHT_REVERSE_DUTY = pwm_pct(pct);
           right_motor_state = REV;
@@ -131,7 +123,6 @@ void motor_set(MotorSide side, uint32_t pct, MotorDir dir) {
       break;
     default: break;
   }
-  display_motors();
 }
 
 void motor_set_bidir(MotorSide side, uint32_t pct_bi) {
@@ -155,10 +146,4 @@ void motor_set_bidir(MotorSide side, uint32_t pct_bi) {
 void motors_set(uint32_t pct, MotorDir dir) {
   motor_set(MOTOR_LEFT, pct, dir);
   motor_set(MOTOR_RIGHT, pct, dir);
-}
-
-static inline void display_motors() {
-  snprintf(display_line[0], 11, " %d | %d  ", LEFT_FORWARD_DUTY, RIGHT_FORWARD_DUTY);
-  snprintf(display_line[2], 11, " %d | %d  ", LEFT_REVERSE_DUTY, RIGHT_REVERSE_DUTY);
-  display_changed = true;
 }

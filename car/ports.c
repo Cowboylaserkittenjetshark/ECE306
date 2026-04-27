@@ -51,9 +51,9 @@ void init_port_2(void) {
   GPIO_setAsOutputPin(PORT2, CHECK_BAT);
   GPIO_setOutputLowOnPin(PORT2, CHECK_BAT);
 
-  // Configure IR_LED as default low GPIO
+  // Configure IR_LED as default high GPIO
   GPIO_setAsOutputPin(PORT2, IR_LED);
-  GPIO_setOutputLowOnPin(PORT2, IR_LED);
+  GPIO_setOutputHighOnPin(PORT2, IR_LED);
 
   // Configure switch 2 for interrupts
   GPIO_setAsInputPinWithPullUpResistor(PORT2, SW2);

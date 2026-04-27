@@ -1,9 +1,10 @@
 #include "include/menu.h"
-#include "include/ir.h" // For thumb wheel value
-#include "include/global.h" // Display write
+#include "include/thumb.h" // For thumb wheel value
+#include "include/global.h" // Display
 #include "include/display.h" // Display utilities
-#include <stdio.h>
-#include <string.h>
+
+#include <stdio.h> // snprintf
+#include <string.h> // strncpy
 
 static const char main_menu_items[3][11] = {"Resistors", "Shapes", "Song"};
 static const char colors[10][11] = {"Black", "Brown", "Red", "Orange", "Yellow", "Green", "Blue", "Violet", "Gray", "White"};

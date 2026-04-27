@@ -7,6 +7,8 @@
 #define INITIAL_PWM_PERIOD (50005)
 #define PWM_DUTY_MAX       (INITIAL_PWM_PERIOD - 5)
 #define PWM_DUTY_MIN       (0)
+#define PWM_PCT_MAX        (100)
+#define PWM_PCT_MIN        (10)
 
 #define PWM_PERIOD         (TB3CCR0)
 #define LCD_BACKLIGHT_DUTY (TB3CCR1)

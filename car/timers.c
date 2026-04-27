@@ -28,7 +28,7 @@ void init_timer_b0(void) {
 
 #pragma vector=TIMER0_B0_VECTOR
 __interrupt void timer_b0_interrupt(void) {
-    TB0CCR0 +=  TB0CCR0_INTERVAL;
+    TB0CCR0 += TB0CCR0_INTERVAL;
     Time_Sequence += 1;
     if(Time_Sequence > 250) Time_Sequence = 0;
     update_display = 1;
@@ -36,12 +36,12 @@ __interrupt void timer_b0_interrupt(void) {
     one_time = 1;
     ADCCTL0 |= ADCSC;
 
-    switch (__even_in_range(TB0IV, 14)) {
-        case 14:
-            dac_adjust();
-            break;
-        default: break;
-    }
+    // switch (__even_in_range(TB0IV, 14)) {
+    //     case 14:
+    //         dac_adjust();
+    //         break;
+    //     default: break;
+    // }
 }
 
 void init_timer_b3(void) {

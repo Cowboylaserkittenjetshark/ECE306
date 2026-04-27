@@ -1,7 +1,10 @@
 #include <driverlib.h>
 #include "include/adc.h"
-#include "include/ir.h"
 #include "include/ports.h"
+
+// Peripherals
+#include "include/ir.h"
+#include "include/thumb.h"
 
 void init_adc(void) {
   current_channel = 2;
@@ -22,7 +25,7 @@ void init_adc(void) {
 
   ADCCTL2 = 0;
   ADCCTL2 |= ADCPDIV0;
-  ADCCTL2 |= ADCRES_2;
+  ADCCTL2 |= ADCRES_2; // 10-bit mode
   ADCCTL2 &= ~ADCDF;
   ADCCTL2 &= ~ADCSR;
 
@@ -59,12 +62,6 @@ __interrupt void adc_interrupt(void) {
         case 5:
           thumb = ADCMEM0;
           ADCMCTL0 &= ~ADCINCH_5;
-          ADCMCTL0 |= ADCINCH_2;
-          current_channel = 2;
-          break;
-        case 10:
-          vbat = ADCMEM0;
-          ADCMCTL0 &= ~ADCINCH_10;
           ADCMCTL0 |= ADCINCH_2;
           current_channel = 2;
           break;
