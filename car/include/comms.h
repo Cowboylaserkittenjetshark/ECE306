@@ -6,7 +6,7 @@
 
 #define TX_BUFF_LEN (64)
 #define MAX_ARGS (2)
-#define CMD_LEN (3)
+#define CMD_LEN (64)
 #define IOT_INIT_FRAME_LEN (4)
 
 typedef enum command { NONE, UNKNOWN, TEST, DRIVE, TURN, SET_BAUD_FAST, SET_BAUD_SLOW } Command;
@@ -20,6 +20,11 @@ static inline void init_serial_uca1(char speed);
 void comms_process(void);
 static inline void pc_log(const char * msg);
 inline void iot_msg(const char * msg);
+static inline bool is_float_start(char c);
+static inline float parse_float(const char ** buffp);
+static inline void drive_command(void);
+static inline void turn_command(void);
+static inline bool curvature_command(void);
 
 bool volatile pc_tx_blocked;
 static volatile char pc_tx_buff[TX_BUFF_LEN + 1];

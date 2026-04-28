@@ -7,11 +7,12 @@
 #include <string.h>
 #include <stdbool.h>
 
-const char iot_init_frame[IOT_INIT_FRAME_LEN][TX_BUFF_LEN] = { "AT+CIPSTAMAC=\"E0:51:D8:21:6A:E4\"", "AT+SYSSTORE=0", "AT+CIPMUX=1", "AT+CIPSERVER=1,3108" };
+const char iot_init_frame[IOT_INIT_FRAME_LEN][TX_BUFF_LEN] = { "AT+CIPSTAMAC=\"E0:51:D8:21:6A:E4\"", "AT+SYSSTORE=0", "AT+CIPMUX=1", "AT+CIPSERVER=1,3107" };
 
 void comms_process(void) {
     if(cmd_ready) {
-        switch (cmd_buff[0]) {
+        char * currc = cmd_buff;
+        switch (*(currc++)) {
             case '^':
                 pc_log("TEST");
                 break;
@@ -22,45 +23,74 @@ void comms_process(void) {
                 pc_log("SLOW BAUD");
                 break;
             case 'D':
-                if(cmd_buff_id < 3) {
-                    pc_log("Command too short");
-                } else {
-                    motor_set_bidir(MOTOR_LEFT, cmd_buff[1]);
-                    motor_set_bidir(MOTOR_RIGHT, cmd_buff[2]);
-                }
+                drive_command();
                 break;
             case 'T':
-                if(cmd_buff_id < 3) {
-                    pc_log("Command too short");
-                } else {
-                    snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Turning %c at %d percent", cmd_buff[1], (cmd_buff[2] - '0') * 10);
-                    uint32_t pct;
-                    if(cmd_buff[2] >= '0' && cmd_buff[2] <= ':') pct = (cmd_buff[2] - '0') * 10;
-                    else pct = 0;
-                    switch (cmd_buff[1]) {
-                        case 'L':
-                            motor_forward(MOTOR_LEFT, pct);
-                            motor_reverse(MOTOR_RIGHT, pct);
-                            break;
-                        case 'R':
-                            motor_forward(MOTOR_RIGHT, pct);
-                            motor_reverse(MOTOR_LEFT, pct);
-                            break;
-                        default:
-                            motors_off();
-                            break;
-                    }
-                    schedule_task(MOTORS_OFF, 5);
-                    pc_tx_id = 0;
-                    pc_tx_blocked = true;
-                    UCA1IE |= UCTXIE; // Enable transmit
-                }
+                turn_command();
+                break;
+            case 'C':
+                if(!curvature_command()) pc_log("Malformed curvature");
                 break;
             default:
                 pc_log("Unknown");
                 break;
         }
         cmd_ready = false;
+    }
+}
+
+static inline bool curvature_command() {
+    volatile char * currc = cmd_buff + 1;
+    float fwd_pct = 0.0;
+    float turn_pct = 0.0;
+
+    if(is_float_start(*currc)) {
+        fwd_pct = parse_float(&currc);
+        if(*currc != ',') return false;
+        else currc += 1;
+        if(is_float_start(*currc)) {
+            turn_pct = parse_float(&currc);
+            motor_set_bidir(MOTOR_LEFT, fwd_pct - turn_pct);
+            motor_set_bidir(MOTOR_RIGHT, fwd_pct + turn_pct);
+        } else return false;
+    } else return false;
+    return true;
+}
+
+static inline void drive_command() {
+    if(cmd_buff_id < 3) {
+        pc_log("Command too short");
+    } else {
+        motor_set_bidir(MOTOR_LEFT, cmd_buff[1]);
+        motor_set_bidir(MOTOR_RIGHT, cmd_buff[2]);
+    }
+}
+
+static inline void turn_command() {
+    if(cmd_buff_id < 3) {
+        pc_log("Command too short");
+    } else {
+        snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Turning %c at %d percent", cmd_buff[1], (cmd_buff[2] - '0') * 10);
+        uint32_t pct;
+        if(cmd_buff[2] >= '0' && cmd_buff[2] <= ':') pct = (cmd_buff[2] - '0') * 10;
+        else pct = 0;
+        switch (cmd_buff[1]) {
+            case 'L':
+                motor_forward(MOTOR_LEFT, pct);
+                motor_reverse(MOTOR_RIGHT, pct);
+                break;
+            case 'R':
+                motor_forward(MOTOR_RIGHT, pct);
+                motor_reverse(MOTOR_LEFT, pct);
+                break;
+            default:
+                motors_off();
+                break;
+        }
+        schedule_task(MOTORS_OFF, 5);
+        pc_tx_id = 0;
+        pc_tx_blocked = true;
+        UCA1IE |= UCTXIE; // Enable transmit
     }
 }
 
@@ -241,4 +271,41 @@ inline void iot_msg(const char * msg) {
     iot_tx_id = 0;
     UCA0TXBUF = 0x00;
     UCA0IE |= UCTXIE; // Enable transmit
+}
+
+static inline float parse_float(const char ** buffp) {
+    const char * buff = *buffp;
+    float sign        = 1.0f;
+    float int_part    = 0.0f;
+    float frac_part   = 0.0f;
+    float frac_scale  = 1.0f;
+
+    if(*buff == '-') {
+        sign = -1.0f;
+        buff++;
+    }
+    else if (*buff == '+') buff++;
+
+    while ((*buff >= '0') && (*buff <= '9')) {
+        int_part = int_part * 10.0f + (float)(*buff - '0');
+        buff++;
+    }
+
+    if (*buff == '.') {
+        buff++;
+        while ((*buff >= '0') && (*buff <= '9')) {
+            frac_scale *= 10.0f;
+            frac_part   = frac_part * 10.0f + (float)(*buff - '0');
+            buff++;
+        }
+        
+        int_part += frac_part / frac_scale;
+    }
+    *buffp = buff;
+
+    return sign * int_part;
+}
+
+static inline bool is_float_start(char c) {
+    return (c == '-') || (c == '+') || ((c >= '0') && (c <= '9'));
 }

@@ -54,17 +54,17 @@ void main(void) {
       // motors_forward(((thumb >> 4) * 100) / 256);
     }
 
-    if(!intercepted) intercepted = line_process();
-    else if(circle_tick < 260) follow_process();
-    else if(circle_tick < 263) {
-      motor_reverse(MOTOR_LEFT, 30);
-      motor_forward(MOTOR_RIGHT, 30);
-    }
-    else if(circle_tick < 265) {
-      motors_off();
-    }
-    else if(circle_tick < 275) motors_forward(100);
-    else motors_off();
+    // if(!intercepted) intercepted = line_process();
+    // else if(circle_tick < 260) follow_process();
+    // else if(circle_tick < 263) {
+    //   motor_reverse(MOTOR_LEFT, 30);
+    //   motor_forward(MOTOR_RIGHT, 30);
+    // }
+    // else if(circle_tick < 265) {
+    //   motors_off();
+    // }
+    // else if(circle_tick < 275) motors_forward(100);
+    // else motors_off();
 
     comms_process();
     scheduler_process();

@@ -125,22 +125,18 @@ void motor_set(MotorSide side, uint32_t pct, MotorDir dir) {
   }
 }
 
-void motor_set_bidir(MotorSide side, uint32_t pct_bi) {
+void motor_set_bidir(MotorSide side, float pct_bi) {
   MotorDir dir;
-  uint32_t pct = (pct_bi * 200) / 255;
-  if(pct > (100 + DEADZONE)) {
-    dir = FWD;
-    pct -= 100;
-  }
-  else if(pct < (100 - DEADZONE)) {
-    dir = REV;
-    pct = 100 - pct;
+  if(pct_bi < 0) {
+    pct_bi *= -1;
+    if(pct_bi > PWM_PCT_MIN) dir = REV;
+    else dir = OFF;
   } else {
-    dir = OFF;
-    pct = 0;
+    if(pct_bi > PWM_PCT_MIN) dir = FWD;
+    else dir = OFF;
   }
 
-  motor_set(side, pct, dir);
+  motor_set(side, (uint32_t) pct_bi, dir);
 }
 
 void motors_set(uint32_t pct, MotorDir dir) {
