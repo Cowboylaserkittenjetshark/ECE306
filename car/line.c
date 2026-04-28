@@ -20,12 +20,12 @@ void follow_process() {
     if(left_ir < WHITE_THRESH && right_ir < WHITE_THRESH) {
         switch (last_dir) {
             case 1: // Left
-                motor_reverse(MOTOR_LEFT, 70);
-                motor_forward(MOTOR_RIGHT, 70);
+                motor_reverse(MOTOR_LEFT, 20);
+                motor_forward(MOTOR_RIGHT, 20);
                 break;
             case 2: // Right
-                motor_forward(MOTOR_LEFT, 50);
-                motor_reverse(MOTOR_RIGHT, 50);
+                motor_forward(MOTOR_LEFT, 20);
+                motor_reverse(MOTOR_RIGHT, 20);
                 break;
             default:
                 break;
@@ -33,12 +33,12 @@ void follow_process() {
     } else {
         correction = (((error * KP) + (derivative * KD)) * 100) / 1024;
         left_wheel_pct = FOLLOW_SPEED - correction;
-        if(left_wheel_pct < 0) left_wheel_pct = 0;
+        if(left_wheel_pct < 0) motor_off(MOTOR_LEFT);
+        else motor_set_bidir(MOTOR_LEFT, left_wheel_pct);
         right_wheel_pct = FOLLOW_SPEED + correction;
-        if(right_wheel_pct < 0) right_wheel_pct = 0;
+        if(right_wheel_pct < 0) motor_off(MOTOR_RIGHT);
+        else motor_set_bidir(MOTOR_RIGHT, right_wheel_pct);
         
-        motor_set(MOTOR_LEFT, left_wheel_pct, FWD);
-        motor_set(MOTOR_RIGHT, right_wheel_pct, FWD);
         if(error < 0) last_dir = 1;
         else last_dir = 2;
     }

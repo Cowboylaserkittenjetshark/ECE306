@@ -8,8 +8,8 @@
 #define WHITE_THRESH (650)
 #define PAUSE_TIME (5)
 #define FOLLOW_SPEED (20)
-#define KP (3)
-#define KD (0)
+#define KP (1.9)
+#define KD (0.1)
 
 typedef enum line_process_state { START, WAIT, SEARCH, PAUSE, ALIGN, END } LineProcessState;
 

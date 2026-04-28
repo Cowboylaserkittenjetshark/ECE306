@@ -26,7 +26,7 @@ void main(void) {
   // Disable the GPIO power-on default high-impedance mode to activate
   // previously configured port settings
   
-    PM5CTL0 &= ~LOCKLPM5;
+  PM5CTL0 &= ~LOCKLPM5;
 
   init_ports();      // Initialize Ports
   init_clocks();     // Initialize Clock System
@@ -54,18 +54,7 @@ void main(void) {
       // motors_forward(((thumb >> 4) * 100) / 256);
     }
 
-    // if(!intercepted) intercepted = line_process();
-    // else if(circle_tick < 260) follow_process();
-    // else if(circle_tick < 263) {
-    //   motor_reverse(MOTOR_LEFT, 30);
-    //   motor_forward(MOTOR_RIGHT, 30);
-    // }
-    // else if(circle_tick < 265) {
-    //   motors_off();
-    // }
-    // else if(circle_tick < 275) motors_forward(100);
-    // else motors_off();
-
+    follow_process();
     comms_process();
     scheduler_process();
     switches_process();
