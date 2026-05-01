@@ -2,6 +2,7 @@
 #include "include/global.h"
 #include "include/ports.h"
 #include <driverlib.h>
+#include <string.h>
 
 void display_process(void) {
   if (update_display) {
@@ -11,6 +12,12 @@ void display_process(void) {
       Display_Update(0, 0, 0, 0);
     }
   }
+}
+
+void lcd_clear() {
+  unsigned int i;
+  for(i = 0; i < 4; i += 1) strcpy(display_line[i], "          ");
+  display_changed = true;
 }
 
 void toggle_backlight() {

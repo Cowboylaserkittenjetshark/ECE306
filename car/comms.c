@@ -4,43 +4,61 @@
 #include "include/motors.h"
 #include "include/actions.h"
 #include "include/timers.h"
+#include "include/display.h"
 #include <string.h>
 #include <stdbool.h>
 
-const char iot_init_frame[IOT_INIT_FRAME_LEN][TX_BUFF_LEN] = { "AT+CIPSTAMAC=\"E0:51:D8:21:6A:E4\"", "AT+SYSSTORE=0", "AT+CIPMUX=1", "AT+CIPSERVER=1,3107" };
+const char iot_init_frame[IOT_INIT_FRAME_LEN][TX_BUFF_LEN] = { "AT+CIPSTAMAC=\"E0:51:D8:21:6A:E4\"", "AT+SYSSTORE=0", "AT+CIPMUX=1", "AT+CIPSERVER=1,3107", "AT+CIFSR" };
 
 void comms_process(void) {
     if(cmd_ready) {
-        char * currc = cmd_buff;
-        switch (*(currc++)) {
-            case '^':
-                pc_log("TEST");
-                break;
-            case 'F':
-                pc_log("FAST BAUD");
-                break;
-            case 'S':
-                pc_log("SLOW BAUD");
-                break;
-            case 'D':
-                drive_command();
-                break;
-            case 'T':
-                turn_command();
-                break;
-            case 'C':
-                if(!curvature_command()) pc_log("Malformed curvature");
-                break;
-            default:
-                pc_log("Unknown");
-                break;
+        char * currc = strchr(cmd_buff, '^');
+        if(currc != NULL) handle_command(currc); // Got a ^{CMD} style command
+        else { // Got IOT info
+            char * ip = strstr(cmd_buff, "STAIP");
+            if(ip != NULL) {
+                ip += 7;
+                int i;
+                for(i = 0; i < 16; i += 1) {
+                    if(*ip == '"') break;
+                    else ip_addr[i] = *(ip++);
+                }
+                ip_changed = true;
+            }
         }
         cmd_ready = false;
     }
 }
 
-static inline bool curvature_command() {
-    volatile char * currc = cmd_buff + 1;
+static inline void handle_command(const char * currc) {
+    currc += 1; // Throw away ^
+    display_command(currc);
+    switch (*(currc++)) {
+        case '^':
+            pc_log("TEST");
+            break;
+        case 'F':
+            pc_log("FAST BAUD");
+            break;
+        case 'S':
+            pc_log("SLOW BAUD");
+            break;
+        case 'C':
+            if(!curvature_command(currc)) pc_log("Malformed curvature");
+            break;
+        case 'P':
+            follow_command();
+            break;
+        case 'N':
+            pad_command(currc);
+            break;
+        default:
+            pc_log("Unknown");
+            break;
+    }
+}
+
+static inline bool curvature_command(const char * currc) {
     float fwd_pct = 0.0;
     float turn_pct = 0.0;
 
@@ -57,50 +75,31 @@ static inline bool curvature_command() {
     return true;
 }
 
-static inline void drive_command() {
-    if(cmd_buff_id < 3) {
-        pc_log("Command too short");
-    } else {
-        motor_set_bidir(MOTOR_LEFT, cmd_buff[1]);
-        motor_set_bidir(MOTOR_RIGHT, cmd_buff[2]);
-    }
+static inline void follow_command() {
+    queue_sequential_task(INIT_LINE_ALIGN);
+    queue_sequential_task(LINE_ALIGN);
+    queue_sequential_task(INIT_LINE_FOLLOW);
+    queue_sequential_task(LINE_FOLLOW);
 }
 
-static inline void turn_command() {
-    if(cmd_buff_id < 3) {
-        pc_log("Command too short");
-    } else {
-        snprintf(pc_tx_buff, TX_BUFF_LEN - 1, "Turning %c at %d percent", cmd_buff[1], (cmd_buff[2] - '0') * 10);
-        uint32_t pct;
-        if(cmd_buff[2] >= '0' && cmd_buff[2] <= ':') pct = (cmd_buff[2] - '0') * 10;
-        else pct = 0;
-        switch (cmd_buff[1]) {
-            case 'L':
-                motor_forward(MOTOR_LEFT, pct);
-                motor_reverse(MOTOR_RIGHT, pct);
-                break;
-            case 'R':
-                motor_forward(MOTOR_RIGHT, pct);
-                motor_reverse(MOTOR_LEFT, pct);
-                break;
-            default:
-                motors_off();
-                break;
-        }
-        schedule_task(MOTORS_OFF, 5);
-        pc_tx_id = 0;
-        pc_tx_blocked = true;
-        UCA1IE |= UCTXIE; // Enable transmit
-    }
+static inline void pad_command(const char * currc) {
+    pad_num = *currc;
+    pad_changed = true;
 }
 
 void init_serial_comms(char speed) {
     init_serial_uca0(speed);
     init_serial_uca1(speed);
+    
+    pad_num = '\0';
+    pad_changed = false;
+    strcpy(ip_addr, "0.0.0.0");
+    ip_changed = false;
+
     iot_init_frame_id = 0;
     unsigned int i;
     for(i = 1; i <= IOT_INIT_FRAME_LEN; i += 1) {
-        schedule_task(IOT_INIT, 10 * i);
+        schedule_timed_task(IOT_INIT, 10 * i);
     }
 }
 
@@ -138,6 +137,7 @@ void init_serial_uca0(char speed) {
     iot_tx_id = 0;
     
     uca0_state = NOR;
+    cmd_buff[0] = '\0';
     cmd_buff_id = 0;
     cmd_ready = false; 
 }
@@ -186,7 +186,7 @@ __interrupt void uca0_interrupt() {
             iot_rx_char = UCA0RXBUF;
             switch (uca0_state) {
                 case NOR:
-                    if(iot_rx_char == '^') {
+                    if(iot_rx_char == '+') {
                         uca0_state = CMD;
                         cmd_ready = false;
                         cmd_buff_id = 0;
@@ -309,3 +309,52 @@ static inline float parse_float(const char ** buffp) {
 static inline bool is_float_start(char c) {
     return (c == '-') || (c == '+') || ((c >= '0') && (c <= '9'));
 }
+
+void display_all() {
+    if(cmd_buff[0] == '\0') {
+        display_splash();
+        display_ip(2);
+    } else {
+        display_pad();
+        display_ip(1);
+        display_timer();
+    }
+}
+
+static inline void display_command(const char * currc) {
+    snprintf(display_line[3], 6, "%s      ", currc);
+    display_changed = true;
+}
+
+static inline void display_pad() {
+    if(pad_changed) {
+        if(pad_num != '\0') snprintf(display_line[0], 11, "Arrived 0%c", pad_num);
+        else strcpy(display_line[0], "          ");
+        display_changed = true;
+        pad_changed = false;
+    }
+}
+
+static inline void display_splash() {
+    strcpy(display_line[0], " Waiting  ");
+    strcpy(display_line[1], "for input ");
+    display_changed = true;
+}
+
+static inline void display_ip(unsigned int line) {
+    if(ip_changed) {
+        strncpy(display_line[line], ip_addr, 10);
+        strncpy(display_line[line + 1], ip_addr + 10, 10);
+        display_changed = true;
+        ip_changed = false;
+    }
+}
+
+static inline void display_timer() {
+    if(on_time_changed) {
+        snprintf(display_line[3] + 6, 3, "%ds", on_time>>1);
+        display_changed = true;
+        on_time_changed = false;
+    }
+}
+

@@ -13,6 +13,6 @@ void init_ir(void);
 void toggle_emitter(void);
 void display_emitter_status(void);
 void display_detector_status(void);
-void display_line_state(void);
+void display_line_align_state(void);
 
 #endif

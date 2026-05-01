@@ -9,7 +9,7 @@
 #include "msp430.h"
 
 void carlson_state_machine(void) {
-  switch (Time_Sequence) {
+  switch (time_sequence) {
   case 250:
     if (one_time) {
       init_leds();
@@ -17,7 +17,7 @@ void carlson_state_machine(void) {
       display_changed = 1;
       one_time = 0;
     }
-    Time_Sequence = 0;
+    time_sequence = 0;
     break;
   case 200:
     if (one_time) {

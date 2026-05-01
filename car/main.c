@@ -26,7 +26,7 @@ void main(void) {
   // Disable the GPIO power-on default high-impedance mode to activate
   // previously configured port settings
   
-  PM5CTL0 &= ~LOCKLPM5;
+   PM5CTL0 &= ~LOCKLPM5;
 
   init_ports();      // Initialize Ports
   init_clocks();     // Initialize Clock System
@@ -38,23 +38,19 @@ void main(void) {
   init_adc();        // Initialize ADC
   init_scheduler();  // Initialize scheduler
   init_serial_comms('s');
-  init_follow();
-  init_line();
-  
-  bool intercepted = false;
-  unsigned int circle_tick = 0;
+
+  lcd_clear();
   // Begining of the "While" Operating System
   while (true) {
-    if (Time_Sequence != last_time_sequence) {
-      last_time_sequence = Time_Sequence;
+    if (time_sequence != last_time_sequence) {
+      last_time_sequence = time_sequence;
       cycle_time += 1;
       time_change = true;
-      next_tick = true;
-      circle_tick += 1;
-      // motors_forward(((thumb >> 4) * 100) / 256);
+      timed_tasks_next_tick = true;
+      line_follow_ticks_elapsed += 1;
+      display_all();
     }
 
-    follow_process();
     comms_process();
     scheduler_process();
     switches_process();

@@ -13,15 +13,22 @@ void init_timers(void) {
 }
 
 void init_timer_b0(void) {
-    Time_Sequence = 0;
+    time_sequence = 0;
     one_time = 0;
+    on_time = 0;
+    on_time_changed = false;
     TB0CTL = TBSSEL__SMCLK;
     TB0CTL |= TBCLR;
     TB0CTL |= MC__CONTINUOUS;
     TB0CTL |= ID__8;
     TB0EX0 |= TBIDEX__8;
+
     TB0CCR0 = TB0CCR0_INTERVAL;
     TB0CCTL0 |= CCIE;
+
+    TB0CCR1 = TB0CCR1_INTERVAL;
+    TB0CCTL1 |= CCIE;
+
     TB0CTL &= ~TBIE;
     TB0CTL &= ~TBIFG;
 }
@@ -29,8 +36,8 @@ void init_timer_b0(void) {
 #pragma vector=TIMER0_B0_VECTOR
 __interrupt void timer_b0_interrupt(void) {
     TB0CCR0 += TB0CCR0_INTERVAL;
-    Time_Sequence += 1;
-    if(Time_Sequence > 250) Time_Sequence = 0;
+    time_sequence += 1;
+    if(time_sequence > 250) time_sequence = 0;
     update_display = 1;
     update_display_count += 1;
     one_time = 1;
@@ -42,6 +49,20 @@ __interrupt void timer_b0_interrupt(void) {
     //         break;
     //     default: break;
     // }
+}
+
+#pragma vector=TIMER0_B1_VECTOR
+__interrupt void timer_b1_interrupt(void) {
+    switch (__even_in_range(TB0IV, TB0IV_TBIFG)) {
+        case TB0IV_NONE: break;
+        case TB0IV_TB0CCR1:
+            TB0CCR1 += TB0CCR1_INTERVAL;
+            on_time += 1;
+            if(on_time >= 2000) on_time = 0;
+            on_time_changed = true;
+            break; 
+        default: break;
+    }
 }
 
 void init_timer_b3(void) {
