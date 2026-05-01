@@ -38,6 +38,7 @@ static inline bool execute_action(Action act) {
     switch (act) {
         case MOTORS_OFF: return motors_off_action();
         case IOT_INIT: return iot_init_action();
+        case IOT_KEEP_ALIVE_PING: return iot_keep_alive_ping_action();
         case INIT_LINE_ALIGN: return init_line_align_action();
         case LINE_ALIGN: return line_align_action();
         case INIT_LINE_FOLLOW: return init_line_follow_action();
@@ -54,6 +55,12 @@ static inline bool motors_off_action() {
 static inline bool iot_init_action() {
     iot_msg(iot_init_frame[iot_init_frame_id]);
     iot_init_frame_id += 1;
+    return true;
+}
+
+static inline bool iot_keep_alive_ping_action() {
+    iot_msg("AT+PING=\"10.137.66.42\"");
+    schedule_timed_task(IOT_KEEP_ALIVE_PING, 25);
     return true;
 }
 

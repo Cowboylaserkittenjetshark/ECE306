@@ -6,7 +6,7 @@
 #define MAX_TIMED_TASKS (16)
 #define MAX_SEQ_TASKS (16)
 
-typedef enum action { MOTORS_OFF, IOT_INIT, INIT_LINE_ALIGN, LINE_ALIGN, INIT_LINE_FOLLOW, LINE_FOLLOW } Action;
+typedef enum action { MOTORS_OFF, IOT_INIT, IOT_KEEP_ALIVE_PING, INIT_LINE_ALIGN, LINE_ALIGN, INIT_LINE_FOLLOW, LINE_FOLLOW } Action;
 typedef struct timed_future {
     Action act;
     unsigned int ticks; 
@@ -27,5 +27,6 @@ void queue_sequential_task(Action act);
 static inline bool execute_action(Action act);
 static inline bool motors_off_action(void);
 static inline bool iot_init_action(void);
+static inline bool iot_keep_alive_ping_action(void);
 
 #endif

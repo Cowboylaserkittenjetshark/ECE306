@@ -101,6 +101,7 @@ void init_serial_comms(char speed) {
     for(i = 1; i <= IOT_INIT_FRAME_LEN; i += 1) {
         schedule_timed_task(IOT_INIT, 10 * i);
     }
+    schedule_timed_task(IOT_KEEP_ALIVE_PING, (IOT_INIT_FRAME_LEN + 1) * 10);
 }
 
 void init_serial_uca0(char speed) {
